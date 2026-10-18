@@ -18,9 +18,9 @@ The hosted Daily page reuses the existing premium GroceryStorefront component, o
 
 ## Validation
 
-`supabase/tests/grocery_transactions.sql` passed in the hosted database: price calculation, stock decrement, idempotent receiving/checkout, changed-payload rejection, full-slot rejection, insufficient-stock rollback, membership/staff authorization, cancellation replay, status transitions and cross-user order RLS. Browser basket tests also pass. Production build and TypeScript pass.
+`supabase/tests/grocery_transactions.sql` passed in the hosted database: price calculation, stock decrement, idempotent receiving/checkout, changed-payload rejection, full-slot rejection, insufficient-stock rollback, membership/staff authorization, cancellation replay, status transitions and cross-user order RLS. Browser basket tests also pass. Production build and TypeScript pass. Phone (390px) dark/light screenshots and a tablet (820px) check were performed; the tablet sidebar transform regression was corrected.
 
-The owner account was created by the user and the explicitly approved platform role was assigned and verified. The user reports successful Chrome sign-in; authenticated grocery UI end-to-end verification remains pending. This is not yet a verified operational grocery launch. Real prices, stock, supplier expiry dates, delivery slots and project coverage are entered in the Manage screen after owner setup.
+The owner account was created by the user and the explicitly approved platform role was assigned and verified. The user reports successful Chrome sign-in; authenticated Daily, empty order history and owner management forms were verified in the in-app browser. Actual checkout still needs real stock, a verified delivery address and a delivery slot. This is not yet a verified operational grocery launch. Real prices, stock, supplier expiry dates, delivery slots and project coverage are entered in the Manage screen after owner setup.
 
 ## Remaining modules
 
