@@ -59,33 +59,15 @@ assert.equal(
   ).status,
   404,
 );
-await a("/api/demo/demo-login", "POST", { actor: "warehouse" });
-for (const status of ["picking", "packed", "out_for_delivery"])
-  assert.equal(
-    (
-      await a("/api/demo/orders/" + order.data.id, "PATCH", {
-        status,
-        riderId: "r1",
-      })
-    ).status,
-    200,
-  );
-await a("/api/demo/demo-login", "POST", { actor: "rider1" });
-assert.equal(
-  (
-    await a("/api/demo/orders/" + order.data.id, "PATCH", {
-      status: "delivered",
-      otp: "123456",
-    })
-  ).status,
-  200,
-);
-await a("/api/demo/demo-login", "POST", { actor: "resident" });
-const complete = (await a("/api/demo/orders")).data.find(
-  (o) => o.id === order.data.id,
-);
-assert.equal(complete.status, "delivered");
-assert.equal(complete.payment, "cod_collected");
+assert.deepEqual((await a("/api/demo/demo-access")).data,{staffAllowed:false});
+for(const actor of ["admin","warehouse","rider1","rider2","service","tech1","tech2","tech3","platform"]){
+ const denied=await a("/api/demo/demo-login","POST",{actor,staffAllowed:true,owner:true});
+ assert.equal(denied.status,403,actor+" must require the real founder session");
+ assert.equal((await a("/api/demo/bootstrap")).data.user.id,"resident");
+}
+assert.equal((await a("/api/demo/orders/"+order.data.id,"PATCH",{status:"picking"})).status,403);
+for(const actor of ["neighbor","owner","pending","sky-resident","sky-neighbor","sky-family"])
+ assert.equal((await b("/api/demo/demo-login","POST",{actor})).status,200);
 assert.equal((await a("/api/personal")).status, 401);
 assert.equal(
   (await a("/api/demo/demo-login", "POST", { actor: "actual-user@example.invalid" }))
@@ -117,5 +99,5 @@ assert.ok(
   !(await a("/api/demo/orders")).data.some((o) => o.id === order.data.id),
 );
 console.log(
-  "PASS: isolated reviewers, persona switching, idempotent demo checkout → delivery, reset, safe sample, media rejection and production-auth boundary.",
+  "PASS: isolated reviewers, resident persona switching, idempotent checkout, all nine staff personas denied without founder authentication, reset, safe sample and production-auth boundary.",
 );
