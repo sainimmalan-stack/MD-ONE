@@ -1,3 +1,4 @@
+import { hostedPersonal } from './hosted-personal';
 import { hostedOperations } from './hosted-operations';
 import { hostedCommunity } from './hosted-community';
 import { randomBytes, createHash } from 'node:crypto';
@@ -32,7 +33,7 @@ function setSession(response:NextResponse, session:any) {
 export async function hostedAuth(req:NextRequest, path:string[]) {
   try {
     const route=path.join('/');
-    if(req.method!=='GET') { sameOrigin(req); if(Number(req.headers.get('content-length')||0)>(/^(my-profile|social-posts|exchange|homes|my-project)(\/|$)/.test(route)?4400000:64000)) return json({error:'Request too large.'},413); }
+    if(req.method!=='GET') { sameOrigin(req); if(Number(req.headers.get('content-length')||0)>(/^(my-profile|social-posts|exchange|homes|my-project|personal)(\/|$)/.test(route)?4400000:64000)) return json({error:'Request too large.'},413); }
     if(route==='auth/callback' && req.method==='GET') {
       const code=req.nextUrl.searchParams.get('code');
       const verifier=req.cookies.get('md_one_verifier')?.value;
@@ -73,6 +74,8 @@ export async function hostedAuth(req:NextRequest, path:string[]) {
     }
     const respond=(value:unknown,status=200)=>{const response=json(value,status);if(refreshed)setSession(response,refreshed);return response;};
     const rpc=(name:string,body:unknown={})=>call('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(body)},token);
+    const personalResponse=await hostedPersonal(req,route,rpc);
+    if(personalResponse){if(refreshed)setSession(personalResponse,refreshed);return personalResponse;}
     const operationsResponse=await hostedOperations(req,route,rpc);
     if(operationsResponse){if(refreshed)setSession(operationsResponse,refreshed);return operationsResponse;}
     const communityResponse=await hostedCommunity(req,route,rpc);
