@@ -23,8 +23,8 @@ The shared logo image now has an intrinsic bounded CSS size, including standalon
 ## Verification
 
 - TypeScript and optimized Next webpack build passed.
-- 96 domain tests passed, including new synthetic session isolation, lifetime/reset, production guard, overlapping vault-key isolation and media-input rejection tests.
-- `scripts/showcase-smoke.mjs` tests the local **production-mode** build: two isolated reviewers, resident role switching, checkout replay, denial of all nine staff personas without founder authentication (including forged owner flags), safe sample document, reset, and denial of demo credentials on the real personal API. Synthetic fulfilment remains covered by domain tests.
+- 98 domain tests passed, including new synthetic session isolation, lifetime/reset, production guard, overlapping vault-key isolation and media-input rejection tests.
+- `scripts/showcase-smoke.mjs` tests the local **production-mode** build: two isolated reviewers, resident role switching, checkout replay, denial of all nine staff personas without founder authentication (including forged owner flags), safe sample document, reset, and denial of demo credentials on the real personal API. The expanded HTTP suite also verifies personal finance and downloads, community interactions, carpool acceptance, marketplace messages, rental interest, RSVP, service requests and billing. Cross-worker tests additionally carry groceries through delivery and specialists through completion.
 - Browser verification uses the built app on localhost; Vercel status must be checked separately before claiming `/demo` is live. No paid plan or real resident identities are created. A dedicated server-only capability protects encrypted demo storage.
 
 ## Founder-only operations previews
