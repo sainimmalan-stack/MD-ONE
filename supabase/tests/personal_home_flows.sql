@@ -1,0 +1,48 @@
+-- Synthetic identities/records only; all changes rolled back.
+begin;
+insert into auth.users(id,email) values('00000000-0000-4000-8000-000000000091','personal-91@example.invalid'),('00000000-0000-4000-8000-000000000092','personal-92@example.invalid');
+insert into private.staff(user_id,role) values('00000000-0000-4000-8000-000000000092','platform');
+do $$declare u uuid:='00000000-0000-4000-8000-000000000091'; other uuid:='00000000-0000-4000-8000-000000000092'; expense uuid;loan uuid;doc uuid;pay uuid;body jsonb;r jsonb;bad boolean; m text:=to_char(now() at time zone 'Asia/Kolkata','YYYY-MM');
+begin
+ perform set_config('request.jwt.claim.sub',u::text,true);
+ if public.personal_api('context')->'expenses'<>'[]'::jsonb then raise exception 'Initial context not empty';end if;
+ body:=jsonb_build_object('key',gen_random_uuid(),'description','TEST groceries','category','Groceries','kind','expense','amount',25000,'date','2026-10-18');
+ r:=public.personal_api('expense',body);expense:=(r->>'id')::uuid;
+ if public.personal_api('expense',body)<>r then raise exception 'Replay changed';end if;
+ bad:=false;begin perform public.personal_api('expense',body||'{"amount":26000}');exception when others then bad:=true;end;if not bad then raise exception 'Changed-payload replay accepted';end if;
+ bad:=false;begin perform public.personal_api('expense',body||jsonb_build_object('key',gen_random_uuid(),'amount',-1));exception when others then bad:=true;end;if not bad then raise exception 'Negative amount';end if;
+ bad:=false;begin perform public.personal_api('expense',body||jsonb_build_object('key',gen_random_uuid(),'date','2026-02-30'));exception when others then bad:=true;end;if not bad then raise exception 'Invalid date';end if;
+ loan:=(public.personal_api('loan',jsonb_build_object('key',gen_random_uuid(),'title','TEST zero-interest loan','principal',1200000,'rate',0,'months',12,'dueDay',5))->>'id')::uuid;
+ body:=jsonb_build_object('key',gen_random_uuid(),'loanId',loan,'month',m,'amount',100000);
+ pay:=(public.personal_api('payment',body)->>'id')::uuid;perform public.personal_api('payment',body);
+ perform public.personal_api('payment',body||jsonb_build_object('key',gen_random_uuid(),'amount',120000));
+ if (select count(*) from public.loan_payments where loan_id=loan)<>1 or (select amount_paise from public.loan_payments where id=pay)<>120000 or (select verification from public.loan_payments where id=pay)<>'user_marked' then raise exception 'Monthly correction/verification failed';end if;
+ bad:=false;begin perform public.personal_api('payment',body||jsonb_build_object('key',gen_random_uuid(),'month',to_char(now()+interval '2 months','YYYY-MM')));exception when others then bad:=true;end;if not bad then raise exception 'Future payment accepted';end if;
+ doc:=(public.personal_api('document',jsonb_build_object('key',gen_random_uuid(),'name','TEST fixture.pdf','folder','Property','mime','application/pdf','data',encode(convert_to('%PDF-1.4 TEST fixture','UTF8'),'base64')))->>'id')::uuid;
+ r:=public.personal_api('download',jsonb_build_object('id',doc));if decode(r->>'data','base64')<>convert_to('%PDF-1.4 TEST fixture','UTF8') then raise exception 'Document bytes changed';end if;
+ if (select scan_state from public.documents where id=doc)<>'quarantined' then raise exception 'Unscanned PDF falsely marked clean';end if;
+ perform public.personal_api('archive-document',jsonb_build_object('key',gen_random_uuid(),'id',doc));
+ bad:=false;begin perform public.personal_api('download',jsonb_build_object('id',doc));exception when others then bad:=true;end;if not bad then raise exception 'Archived download allowed';end if;
+ perform public.personal_api('restore-document',jsonb_build_object('key',gen_random_uuid(),'id',doc));perform public.personal_api('download',jsonb_build_object('id',doc));
+ perform public.personal_api('archive-expense',jsonb_build_object('key',gen_random_uuid(),'id',expense));perform public.personal_api('restore-expense',jsonb_build_object('key',gen_random_uuid(),'id',expense));
+ perform public.personal_api('archive-loan',jsonb_build_object('key',gen_random_uuid(),'id',loan));
+ bad:=false;begin perform public.personal_api('payment',body||jsonb_build_object('key',gen_random_uuid()));exception when others then bad:=true;end;if not bad then raise exception 'Payment on archived loan';end if;
+ perform public.personal_api('restore-loan',jsonb_build_object('key',gen_random_uuid(),'id',loan));
+ perform set_config('request.jwt.claim.sub',other::text,true);
+ r:=public.personal_api('context');if r->'documents'<>'[]'::jsonb or r->'expenses'<>'[]'::jsonb or r->'loans'<>'[]'::jsonb or r->'loanPayments'<>'[]'::jsonb then raise exception 'Platform staff saw private records';end if;
+ bad:=false;begin perform public.personal_api('download',jsonb_build_object('id',doc));exception when others then bad:=true;end;if not bad then raise exception 'Cross-account download';end if;
+ bad:=false;begin perform public.personal_api('archive-loan',jsonb_build_object('key',gen_random_uuid(),'id',loan));exception when others then bad:=true;end;if not bad then raise exception 'Cross-account archive';end if;
+ bad:=false;begin perform public.personal_api('payment',body||jsonb_build_object('key',gen_random_uuid()));exception when others then bad:=true;end;if not bad then raise exception 'Cross-account loan payment';end if;
+ perform set_config('request.jwt.claim.sub','',true);
+ bad:=false;begin perform public.personal_api('context');exception when others then bad:=true;end;if not bad then raise exception 'Anonymous access';end if;
+end$$;
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000092',true);
+do $$begin
+ if exists(select 1 from public.documents) or exists(select 1 from public.expenses) or exists(select 1 from public.loans) or exists(select 1 from public.loan_payments) then raise exception 'RLS private row leak';end if;
+ if has_table_privilege('authenticated','private.personal_files','SELECT') or has_table_privilege('authenticated','public.expenses','INSERT') or has_table_privilege('authenticated','public.loans','UPDATE') or has_table_privilege('authenticated','public.loan_payments','INSERT') then raise exception 'Raw write/file ACL exposed';end if;
+ if has_function_privilege('anon','public.personal_api(text,jsonb)','EXECUTE') then raise exception 'Anonymous RPC access';end if;
+end$$;
+reset role;
+rollback;
+select 'PASS: personal owner isolation, platform boundary, idempotency, amount/date checks, manual EMI correction, archived-loan protection, unscanned file state, private download, trash recovery, RLS and raw ACLs' as result;
