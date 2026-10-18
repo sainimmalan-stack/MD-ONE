@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.expo/
+.env*
+!.env.example
+.local/
+*.tsbuildinfo
+.DS_Store
+work/
+mobile/node_modules/
+
+# Generated review screenshots and deliverables
+outputs/
