@@ -1,0 +1,59 @@
+/* Five stable primary destinations; related tools live inside their section. */
+.sidebar nav[aria-label="Main navigation"] {
+  display: grid;
+  gap: 8px;
+}
+.sidebar nav[aria-label="Main navigation"] > .nav-item {
+  min-height: 48px;
+  font-size: 12px;
+  margin: 0;
+  padding: 12px 14px;
+}
+.section-navigation {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0 0 14px;
+  margin: 0 0 24px;
+  border-bottom: 1px solid var(--border-default);
+  scrollbar-width: thin;
+}
+.section-navigation > button {
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-height: 40px;
+  padding: 10px 15px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.section-navigation > button:hover {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+}
+.section-navigation > button[aria-current="page"] {
+  background: var(--surface-selected);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+  font-weight: 550;
+}
+@media (max-width: 760px) {
+  .section-navigation {
+    gap: 3px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+  }
+  .section-navigation > button {
+    font-size: 11px;
+    min-height: 42px;
+    padding: 10px 12px;
+  }
+  .mobile-nav button > span {
+    font-size: 9px;
+  }
+}

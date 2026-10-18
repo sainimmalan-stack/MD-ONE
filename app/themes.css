@@ -1,0 +1,564 @@
+/* Appearance tokens and the light counterparts of legacy feature surfaces. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --surface-base: #f6f5f2;
+  --surface-sidebar: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-overlay: #efeeeb;
+  --surface-selected: #e8e6e1;
+  --text-primary: #202022;
+  --text-secondary: #626166;
+  --text-tertiary: #747278;
+  --border-subtle: #2020220d;
+  --border-default: #20202224;
+}
+.appearance-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.appearance-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 42px;
+  min-height: 42px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 10px;
+  cursor: pointer;
+}
+.appearance-trigger:hover {
+  background: var(--surface-selected);
+  color: var(--text-primary);
+}
+.appearance-trigger > span {
+  font-size: 11px;
+}
+.appearance-options {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 222px;
+  padding: 8px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 13px;
+  box-shadow: 0 12px 40px #0002;
+  z-index: 95;
+}
+.appearance-options > span {
+  display: block;
+  padding: 9px 10px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.appearance-options > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  padding: 11px 10px;
+  font-size: 12px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--text-primary);
+}
+.appearance-options > button:hover,
+.appearance-options > button[aria-pressed="true"] {
+  background: var(--surface-selected);
+}
+.appearance-options > button > svg:last-child:not(:first-child) {
+  margin-left: auto;
+  color: var(--brand-orange);
+}
+.appearance-options > p {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin: 8px 10px 5px;
+}
+/* Photography keeps its intentional dark editorial treatment in either theme. */
+[data-theme="light"] .daily-editorial-copy :is(h2, p),
+[data-theme="light"] .daily-image-note {
+  color: #faf8f2;
+}
+[data-theme="light"] .daily-editorial-copy > span {
+  color: #e7d9c3;
+}
+[data-theme="light"] .daily-editorial button {
+  background: #f5f3ed;
+  color: #171719;
+}
+[data-theme="light"] .daily-empty button {
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+[data-theme="light"] .daily-category-photo {
+  box-shadow: 0 0 0 1px #20202208;
+}
+[data-theme="light"] .daily-search kbd {
+  background: var(--surface-base);
+}
+[data-theme="light"] .demo-strip,
+[data-theme="light"] .demo-strip select {
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+}
+[data-theme="light"] :is(.sidebar-line, .header-divider) {
+  background: var(--border-default);
+}
+[data-theme="light"]
+  :is(
+    .sidebar-profile,
+    .user-card,
+    .header-actions .avatar,
+    .avatar.pale,
+    .exp-flat-initial,
+    .exp-person-status,
+    .exp-job-head .exp-pill,
+    .badge,
+    .new-label
+  ) {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"]
+  :is(
+    .notification-pop,
+    .exp-connect-card,
+    .exp-utility-row > button,
+    .exp-search,
+    .exp-project-card,
+    .exp-project-detail,
+    .exp-private-note,
+    .exp-flat-card,
+    .exp-person-card,
+    .exp-nothing,
+    .exp-compose-trigger,
+    .exp-post-menu,
+    .exp-side-panel,
+    .exp-connection-row,
+    .exp-profile-locked-feed,
+    .exp-sheet,
+    .exp-job-card,
+    .cm-modal,
+    .cm-home-strip > button,
+    .empty,
+    .vault-banner,
+    .search-input,
+    .settings-note,
+    .community-event,
+    .post-compose,
+    .order-card,
+    .ticket-card,
+    .document-card,
+    .finance-summary,
+    .schedule-table,
+    .toast
+  ) {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+[data-theme="light"]
+  :is(
+    .exp-service-hero,
+    .exp-profile-cover,
+    .exp-person-cover,
+    .connect-hero,
+    .carpool-banner,
+    .community-art
+  ) {
+  background: linear-gradient(120deg, #efeeeb, #e4e2dd);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"]
+  :is(
+    .exp-service-card,
+    .exp-feed-post,
+    .exp-comments > div,
+    .cm-question-row
+  ) {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"]
+  :is(.experience, .cm-page, .cm-panel, .cm-modal, .exp-sheet, .connect-page) {
+  color: var(--text-primary);
+  --cm-line: var(--border-default);
+  --cm-muted: var(--text-secondary);
+}
+[data-theme="light"]
+  :is(.experience, .cm-page, .cm-modal, .exp-sheet, .connect-page)
+  :is(h1, h2, h3, h4, strong, b, label, button) {
+  color: var(--text-primary);
+}
+[data-theme="light"]
+  :is(.experience, .cm-page, .cm-panel, .cm-modal, .exp-sheet, .connect-page)
+  :is(p, small, .exp-kicker, .exp-meta, .cm-eyebrow, .cm-footnote) {
+  color: var(--text-secondary) !important;
+}
+[data-theme="light"]
+  :is(
+    .exp-post-author,
+    .exp-post-author > b,
+    .exp-post-body,
+    .exp-profile-fact,
+    .exp-person-body,
+    .exp-post-actions,
+    .exp-job-progress,
+    .exp-job-head,
+    .cm-ledger-row,
+    .cm-ledger-total,
+    .cm-metric,
+    .cm-field,
+    .cm-question-row,
+    .cm-item-content,
+    .cm-item-content strong
+  ) {
+  color: var(--text-primary);
+}
+[data-theme="light"]
+  :is(
+    .exp-primary,
+    .exp-secondary,
+    .exp-square-button,
+    .exp-photo-button,
+    .exp-filter-tabs > button,
+    .cm-page button,
+    .cm-modal button,
+    .category-list button,
+    .connect-tabs button,
+    .cm-badge,
+    .exp-pill
+  ) {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"]
+  :is(.exp-primary, .cm-page .cm-primary, .cm-modal .cm-primary) {
+  background: var(--text-primary);
+  color: var(--surface-base);
+  border-color: transparent;
+}
+[data-theme="light"]
+  :is(.cm-page .cm-primary, .cm-modal .cm-primary)
+  :is(span, svg) {
+  color: inherit;
+}
+[data-theme="light"]
+  :is(.exp-primary, .cm-page .cm-primary, .cm-modal .cm-primary):hover {
+  background: #343436;
+  color: #fff;
+}
+[data-theme="light"]
+  :is(
+    .exp-label input,
+    .exp-label select,
+    .exp-label textarea,
+    .exp-composer-controls select,
+    .exp-comments input,
+    .exp-assign-form > select,
+    .cm-page input,
+    .cm-page select,
+    .cm-page textarea,
+    .cm-modal input,
+    .cm-modal select,
+    .cm-modal textarea,
+    .post-compose textarea
+  ) {
+  background: var(--surface-base);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"] :is(.cm-page select option, .cm-modal select option) {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+[data-theme="light"]
+  :is(
+    .exp-filter-tabs,
+    .exp-post-actions,
+    .exp-comments,
+    .exp-job-progress,
+    .exp-service-card-bottom,
+    .cm-item-content,
+    .cm-question-row,
+    .cm-ledger-row,
+    .cm-ledger-total,
+    .cm-exchange-intro,
+    .cm-tabs,
+    .request-row,
+    .ride-meta,
+    .connect-privacy,
+    .connect-request
+  ) {
+  border-color: var(--border-default);
+}
+[data-theme="light"] .connect-tabs button[aria-selected="true"] {
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+[data-theme="light"] :is(.exp-backdrop, .cm-backdrop, .modal-backdrop) {
+  background: #20202266;
+  backdrop-filter: blur(8px);
+}
+[data-theme="light"] .connect-dialog .modal {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"] .social-avatar {
+  background: var(--surface-selected);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"] .nav-item.active svg,
+[data-theme="light"] .mobile-nav button.active svg {
+  color: var(--brand-orange);
+}
+[data-theme="light"] .nav-item:hover {
+  background: var(--surface-overlay);
+}
+[data-theme="light"]
+  :is(.daily-basket, .button, .button.cream, .cart-floating) {
+  box-shadow: none;
+}
+[data-theme="light"] .button:not(.outline) {
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+[data-theme="light"] .button.outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"] .button:hover {
+  background: #343436;
+  color: #fff;
+}
+[data-theme="light"] .button.outline:hover {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+}
+[data-theme="light"] .mini-product {
+  background: var(--surface-overlay);
+}
+[data-theme="light"] .rp-table-scroll th {
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+}
+@media (max-width: 760px) {
+  .appearance-trigger {
+    min-width: 38px;
+    min-height: 42px;
+    padding: 8px;
+  }
+  .appearance-trigger > span {
+    display: none;
+  }
+  .header-actions {
+    gap: 5px;
+  }
+  .header-divider {
+    display: none;
+  }
+  .appearance-options {
+    right: -66px;
+  }
+  .md-one-mobile-brand {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar .location {
+    min-width: 0;
+  }
+  .location > div {
+    min-width: 0;
+  }
+}
+/* Explicit text counterparts for legacy product and accounting typography. */
+[data-theme="light"] .product-info h3,
+[data-theme="light"] .product-price > b {
+  color: var(--text-primary);
+}
+[data-theme="light"] .product-info > small {
+  color: var(--text-secondary);
+}
+[data-theme="light"] .daily-repeat .product-info h3,
+[data-theme="light"] .daily-repeat .product-price > b {
+  color: var(--text-primary);
+}
+[data-theme="light"] .cm-page :is(th, td) {
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+[data-theme="light"]
+  :is(
+    .schedule-table th,
+    .cm-tabs,
+    .cm-filters button.selected,
+    .category-list button.selected
+  ) {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+}
+[data-theme="light"]
+  :is(
+    .order-card,
+    .document-card,
+    .ticket-card,
+    .finance-summary,
+    .vault-banner,
+    .settings-note,
+    .empty,
+    .toast
+  )
+  :is(h2, h3, b, strong, p, span, small) {
+  color: var(--text-primary);
+}
+[data-theme="light"]
+  :is(.notification-pop, .exp-connect-card, .exp-side-panel, .exp-utility-row)
+  :is(b, strong, p, span, small) {
+  color: var(--text-primary);
+}
+[data-theme="light"] :is(.exp-sheet, .cm-modal, .cm-page) input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: var(--text-tertiary);
+}
+[data-theme="light"] .cm-page .cm-overview-grid .cm-dues-hero {
+  border-color: var(--border-default);
+}
+
+[data-theme="light"] .cm-link-button {
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .cm-section-nav {
+  border-color: var(--border-default);
+}
+[data-theme="light"] .cm-section-nav button.active {
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+[data-theme="light"] .cm-question-row {
+  background: var(--surface-raised) !important;
+  border-color: var(--border-default) !important;
+}
+[data-theme="light"] .cm-question-row :is(span, strong, svg) {
+  color: var(--text-primary);
+}
+[data-theme="light"] .cm-section-nav button > span {
+  background: var(--surface-selected);
+  color: var(--text-primary);
+}
+[data-theme="light"]
+  :is(
+    .exp-service-card-bottom,
+    .exp-service-promise,
+    .exp-service-promise > span,
+    .exp-filter-tabs > button > span
+  ) {
+  color: var(--text-primary);
+}
+[data-theme="light"] .exp-service-card-bottom :is(span, svg) {
+  color: var(--text-primary);
+}
+[data-theme="light"] .exp-service-card > small {
+  color: var(--text-secondary);
+}
+[data-theme="light"] .exp-service-hero h1 em {
+  color: var(--text-primary);
+}
+[data-theme="light"] .experience .exp-filter-tabs > button.selected > span {
+  background: var(--surface-selected);
+  color: var(--text-primary);
+}
+[data-theme="light"]
+  :is(.exp-hero-copy, .exp-project-photo, .exp-post-image > small) {
+  color: #fff;
+}
+[data-theme="light"]
+  :is(.exp-hero-copy, .exp-project-photo)
+  :is(h1, h2, h3, p, span, small, em) {
+  color: #fff !important;
+}
+[data-theme="light"]
+  main
+  :is(.event-content, .profile-header, .loan-card, .expense-row)
+  :is(h2, h3, p, b, strong, span) {
+  color: var(--text-primary);
+}
+[data-theme="light"] .connect-page .ride-route,
+[data-theme="light"] .connect-page .ride-route span {
+  color: var(--text-primary);
+}
+[data-theme="light"] .connect-page .connect-car {
+  color: var(--text-secondary);
+}
+[data-theme="light"] .connect-page .connect-tabs button[aria-selected="true"] {
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+[data-theme="light"] .connect-page .connect-tabs > span {
+  color: var(--text-secondary);
+}
+[data-theme="light"] .connect-page .connect-privacy {
+  color: var(--text-secondary);
+}
+
+/* Image captions have their own ink and scrim; the surrounding page can change
+   theme without turning captions dark or washing out the original photograph. */
+:is(.exp-hero, .exp-project-photo, .exp-post-image, .daily-editorial) {
+  --text-primary: #faf8f2;
+  --text-secondary: #e3e0da;
+  --surface-overlay: #242424;
+  --surface-selected: #343436;
+}
+:is(.exp-hero-edition, .exp-hero-bottom, .exp-photo-credit,
+    .exp-project-index, .exp-project-image-type, .exp-post-image > small) {
+  color: #faf8f2;
+}
+.exp-project-index {
+  background: #171719d9;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+[data-theme="light"] .experience .exp-project-photo > .exp-pill,
+[data-theme="light"] .experience .exp-hero .exp-pill {
+  background: #171719df;
+  color: #faf8f2;
+  border-color: #ffffff40;
+}
+[data-theme="light"] .experience .exp-post-image > small {
+  background: #171719df;
+  color: #faf8f2 !important;
+}
+/* Photo buttons are light controls on a dark scrim in either appearance. */
+[data-theme="light"] .experience .exp-hero .exp-primary,
+[data-theme="light"] .experience .exp-hero .exp-primary :is(span, svg) {
+  background: #f5f3ed;
+  color: #202022;
+}
+[data-theme="light"] .exp-garden-art {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+}
+[data-theme="light"] .experience .exp-hero-bottom small {
+  color: #e3e0da !important;
+}

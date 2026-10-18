@@ -1,0 +1,114 @@
+/* Phone shell: persistent destinations, thumb-sized controls and sheet forms. */
+@media (max-width: 760px) {
+  html { scroll-padding-top: 100px; }
+  body { overscroll-behavior-y: none; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 65;
+    height: 76px;
+    background: var(--surface-base);
+    border-bottom: 1px solid var(--border-default);
+  }
+  .main-content { padding: 18px 16px calc(100px + env(safe-area-inset-bottom)); }
+  .main-content > footer { display: none; }
+  .mobile-nav {
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
+    background: var(--surface-sidebar);
+    border-top: 1px solid var(--border-default);
+    backdrop-filter: none;
+    gap: 2px;
+  }
+  .mobile-nav button {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 52px;
+    gap: 5px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+  }
+  .mobile-nav button.active { background: var(--surface-overlay); color: var(--text-primary); }
+  .mobile-nav button.active::before { display: none; }
+  .mobile-nav button > span { font-size: 10px; line-height: 14px; font-weight: 500; }
+  .mobile-nav button svg { width: 21px; height: 21px; }
+  .header-actions .icon-button, .appearance-trigger, .mobile-menu { min-width: 40px; min-height: 44px; }
+  .topbar .location { gap: 6px; }
+  .topbar .header-project { left: 46px; }
+  .section-navigation { margin-bottom: 18px; padding-bottom: 10px; scrollbar-width: none; }
+  .section-navigation > button { min-height: 44px; font-size: 12px; }
+  main :is(input:not([type=checkbox]):not([type=radio]), select, textarea),
+  :is(.cm-modal, .exp-sheet, .homes-dialog, .modal) :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  main :is(.button, .exp-primary, .exp-secondary, .cm-primary, .add-button),
+  :is(.cm-modal, .exp-sheet, .homes-dialog) button { min-height: 44px; }
+  .daily-search { min-height: 50px; }
+  .daily-category-label { font-size: 12px; }
+  .cart-floating { bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(82px + env(safe-area-inset-bottom)); max-width: calc(100vw - 32px); }
+  :is(.cm-backdrop, .exp-backdrop, .modal-backdrop) { align-items: flex-end; padding: 0; }
+  :is(.cm-modal, .exp-sheet, .modal) {
+    width: 100%;
+    max-width: 100%;
+    max-height: 90dvh;
+    border-radius: 22px 22px 0 0;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+  }
+  .homes-dialog {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 90dvh;
+    border-radius: 22px 22px 0 0;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  }
+  :is(.cm-modal, .exp-sheet, .homes-dialog) > header { gap: 12px; }
+  :is(.cm-modal, .exp-sheet, .homes-dialog) > header h2 { font-size: 22px; line-height: 1.3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (max-width: 760px) {
+  .main-shell, .main-content, .daily-store { min-width: 0; }
+  .daily-store { width: 100%; grid-template-columns: minmax(0, 1fr); }
+  .daily-store > * { min-width: 0; }
+  .daily-search input { width: 100%; min-width: 0; }
+  .daily-title > div { min-width: 0; }
+  .daily-title h1 { font-size: 27px; letter-spacing: -1.2px; }
+}
+/* Phone identity: one compact brand row, then a full-width location control. */
+@media (max-width: 600px) {
+  .topbar { height: 98px; padding: 0 16px; align-items: flex-start; }
+  .topbar .location { position: static; padding: 0; gap: 10px; height: 60px; align-items: center; }
+  .topbar .mobile-menu {
+    width: 32px; min-width: 32px; height: 40px; min-height: 40px;
+    padding: 4px; border: 0; border-radius: 0; background: transparent;
+  }
+  .topbar .mobile-menu svg { width: 22px; height: 22px; }
+  .header-brand .md-brand { align-items: flex-start; gap: 3px; }
+  .header-brand .md-brand-parent { font-size: 7px; line-height: 10px; letter-spacing: 1px; padding-left: 28px; }
+  .header-brand .md-brand-product { gap: 6px; }
+  .header-brand .md-brand-product img { width: 22px; flex-basis: 22px; height: 25px; }
+  .header-brand .md-brand-product > span { font-size: 23px; line-height: 26px; letter-spacing: -.8px; }
+  .topbar .header-actions { height: 60px; align-items: center; gap: 2px; }
+  .topbar .header-actions .icon-button, .topbar .appearance-trigger { width: 34px; min-width: 34px; min-height: 40px; padding: 6px; }
+  .topbar .header-actions .avatar { width: 30px; height: 30px; min-width: 30px; }
+  .topbar .header-project {
+    position: absolute; left: 16px; right: 16px; bottom: 0;
+    height: 37px; display: flex; align-items: center;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .topbar .header-project button {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; min-height: 36px; padding: 0;
+    font-size: 11px; line-height: 16px; color: var(--text-secondary);
+  }
+  .topbar .header-project button svg { width: 13px; height: 13px; }
+}
