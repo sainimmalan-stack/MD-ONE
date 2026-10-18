@@ -1,6 +1,7 @@
 "use client";
 import {useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
 import {ArrowUpRight,ArrowRight,Plus,X,Package,Wallet,IndianRupee,FileText,Trash2,LockKeyhole,FolderLock,Download,RefreshCw,Upload,Search} from 'lucide-react';
+import {personalExpensesCsv} from '@/lib/personal-csv';
 import {amortize} from '@/lib/finance';
 import './hosted-personal.css';
 type R=Record<string,any>;
@@ -190,27 +191,13 @@ function Finance({ data, act, busy, view }: any) {
       )
       .reduce((s: number, e: R) => s + e.amount, 0);
   const csv = () => {
-    const escape = (s: any) =>
-      `"${String(s)
-        .replaceAll('"', '""')
-        .replace(/^[=+\-@]/, "'")}"`;
-    const rows = [
-      ["Date", "Description", "Category", "Type", "Amount INR"],
-      ...data.expenses.map((e: R) => [
-        e.date,
-        e.description,
-        e.category,
-        e.kind,
-        e.amount / 100,
-      ]),
-    ];
     const a = document.createElement("a");
     a.href = URL.createObjectURL(
-      new Blob([rows.map((r) => r.map(escape).join(",")).join("\n")], {
+      new Blob([personalExpensesCsv(data.expenses)], {
         type: "text/csv",
       }),
     );
-    a.download = "mdp-expenses.csv";
+    a.download = "md-one-expenses.csv";
     a.click();
     URL.revokeObjectURL(a.href);
   };
