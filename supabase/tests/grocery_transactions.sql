@@ -7,7 +7,7 @@ do $$
 declare p uuid; f uuid; s uuid; pr uuid; result jsonb; again jsonb; k uuid:=gen_random_uuid(); receipt uuid:=gen_random_uuid(); batch uuid; n integer; rejected boolean; o uuid;
 begin
  select id into p from public.projects limit 1;
- insert into public.flats(project_id,label) values(p,'99999') returning id into f;
+ insert into public.flats(project_id,label) values(p,'99998') returning id into f;
  insert into public.memberships(user_id,flat_id,kind,status) values(auth.uid(),f,'tenant','approved');
  perform public.grocery_enable_project(p,true);
  batch:=public.grocery_receive('TEST ONLY rice','Staples','1 kg',10000,7000,10,now()+interval '30 days','TEST ONLY supplier',receipt);
