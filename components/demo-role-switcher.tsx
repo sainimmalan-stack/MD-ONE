@@ -26,7 +26,7 @@ const groups:{title:string;description:string;people:DemoPerson[]}[]=[
  ]},
  {title:"MDP administration",description:"Platform setup and committee appointments. Personal vaults and project accounting access remain separate.",people:[{id:"platform",name:"Platform operations",staff:"Platform administrator",scope:"MD One operations & appointments"}]},
 ];
-export function DemoRoleSwitcher({actor,busy,onChange}:{actor:string;busy:boolean;onChange:(id:string)=>Promise<void>}){
+export function DemoRoleSwitcher({actor,busy,onChange,staffAllowed=false}:{actor:string;busy:boolean;onChange:(id:string)=>Promise<void>;staffAllowed?:boolean}){
  const [open,setOpen]=useState(false);const dialog=useRef<HTMLDialogElement>(null);
  const person=groups.flatMap(g=>g.people).find(p=>p.id===actor);
  useEffect(()=>{const el=dialog.current;if(open&&!el?.open)el?.showModal();if(!open&&el?.open)el.close();},[open]);
@@ -36,7 +36,8 @@ export function DemoRoleSwitcher({actor,busy,onChange}:{actor:string;busy:boolea
   <dialog ref={dialog} className="demo-role-dialog" aria-labelledby="demo-role-title" onCancel={()=>setOpen(false)} onClose={()=>setOpen(false)}>
    <header><div><p>EXPLORE MD ONE</p><h2 id="demo-role-title">Choose a demo user</h2></div><button aria-label="Close demo users" onClick={()=>setOpen(false)}><X size={21}/></button></header>
    <p className="demo-role-note">Sample identities for reviewing the app. Switching here never changes your real account or permissions.</p>
-   {groups.map(group=><section key={group.title}><h3>{group.title}</h3><p>{group.description}</p><div className="demo-role-people">{group.people.map(p=><button key={p.id} disabled={busy} aria-pressed={actor===p.id} onClick={()=>{setOpen(false);void onChange(p.id);}}><div><strong>{p.name}</strong><dl>{"membership" in p&&<div><dt>Membership</dt><dd>{p.membership}</dd></div>}{"committee" in p&&<div><dt>Committee</dt><dd>{p.committee}</dd></div>}{"staff" in p&&<div><dt>Staff role</dt><dd>{p.staff}</dd></div>}{p.status&&<div><dt>Status</dt><dd>{p.status}</dd></div>}</dl><small>{p.scope}</small></div>{actor===p.id?<Check size={19}/>:<ArrowRight size={17}/>}</button>)}</div></section>)}
+   {groups.filter((_,i)=>i===0||staffAllowed).map(group=><section key={group.title}><h3>{group.title}</h3><p>{group.description}</p><div className="demo-role-people">{group.people.map(p=><button key={p.id} disabled={busy} aria-pressed={actor===p.id} onClick={()=>{setOpen(false);void onChange(p.id);}}><div><strong>{p.name}</strong><dl>{"membership" in p&&<div><dt>Membership</dt><dd>{p.membership}</dd></div>}{"committee" in p&&<div><dt>Committee</dt><dd>{p.committee}</dd></div>}{"staff" in p&&<div><dt>Staff role</dt><dd>{p.staff}</dd></div>}{p.status&&<div><dt>Status</dt><dd>{p.status}</dd></div>}</dl><small>{p.scope}</small></div>{actor===p.id?<Check size={19}/>:<ArrowRight size={17}/>}</button>)}</div></section>)}
+   {!staffAllowed&&<section className="demo-staff-private"><h3>Staff workspace</h3><p>Project support, grocery operations, home services and administration are private to the signed-in MD One founder.</p><a href="/">Sign in to your account <ArrowRight size={15}/></a></section>}
   </dialog>
  </div>;
 }

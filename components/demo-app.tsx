@@ -281,6 +281,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
   const [data, setData] = useState<R | null>(null),
     [tab, setTab] = useState("home"),
     [actor, setActor] = useState("resident"),
+    [staffDemoAllowed, setStaffDemoAllowed] = useState(false),
     [cartOpen, setCartOpen] = useState(false),
     [notice, setNotice] = useState(""),
     [error, setError] = useState(""),
@@ -304,6 +305,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
     setActor(d.user.id);
   };
   useEffect(() => {
+    if (showcase) void api("demo-access").then(d=>setStaffDemoAllowed(d.staffAllowed===true)).catch(()=>setStaffDemoAllowed(false));
     api("bootstrap")
       .then((d) => {
         setData(d);
@@ -502,7 +504,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
         </div>
       </aside>
       <div className="main-shell">
-        {showcase && <div className="demo-strip"><DemoRoleSwitcher actor={actor} busy={busy} onChange={switchPersona}/></div>}
+        {showcase && <div className="demo-strip"><DemoRoleSwitcher actor={actor} busy={busy} onChange={switchPersona} staffAllowed={staffDemoAllowed}/></div>}
         <header className="topbar">
           <div className="location">
             <a
