@@ -268,7 +268,7 @@ export function GroceryStorefront({
             </h2>
           </div>
           <button onClick={() => go("essentials")}>
-            All products & orders <ArrowUpRight size={16} />
+            {hosted ? "Browse catalogue" : "All products & orders"} <ArrowUpRight size={16} />
           </button>
         </div>
         <div className="daily-shelf-controls">
@@ -305,8 +305,8 @@ export function GroceryStorefront({
         {!filtered.length && (
           <div className="daily-empty">
             <Search size={28} />
-            <h3>No products on this shelf.</h3>
-            <p>Try a different search or browse another category.</p>
+            <h3>{hosted && !data.products.length ? "Your daily store is getting ready." : "No products on this shelf."}</h3>
+            <p>{hosted && !data.products.length ? "Products will appear when your community store adds confirmed stock." : "Try a different search or browse another category."}</p>
             <button
               onClick={() => {
                 setSearch("");
