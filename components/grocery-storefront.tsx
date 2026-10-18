@@ -59,7 +59,7 @@ const tiles: Record<string, number> = {
   tea: 13,
 };
 export function ProductArt({ p }: { p: R }) {
-  const tile = tiles[p.id];
+  const tile = tiles[p.art_key || p.id];
   if (tile === undefined) {
     const g = storeGroups.find((g) => g.name === p.category);
     const Icon = g?.icon || ShoppingBasket;
@@ -101,7 +101,7 @@ export function GroceryStorefront({
 }) {
   const [category, setCategory] = useState("All"),
     [search, setSearch] = useState(""),
-    [range, setRange] = useState("stocked");
+    [range, setRange] = useState(hosted ? "all" : "stocked");
   const stocked = (p: R) => p.stock > 0 && p.launch_state !== "planned";
   const filtered = data.products
     .filter(
