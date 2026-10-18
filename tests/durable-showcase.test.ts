@@ -289,7 +289,11 @@ test("new workers carry grocery checkout through delivery and a service request 
   );
   await run("resident", (s, u) =>
     assert.equal(
-      s.orders(u).find((o) => o.id === order.id)?.status,
+      s.one(
+        "SELECT status FROM orders WHERE id=? AND user_id=?",
+        order.id,
+        u.id,
+      )?.status,
       "delivered",
     ),
   );
