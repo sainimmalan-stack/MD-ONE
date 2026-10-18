@@ -929,8 +929,7 @@ export class Service {
       fail("File size must be between 1 byte and 5 MB.");
     const sample =
       mime === "text/plain" &&
-      data.toString() ===
-        "MDP Living synthetic sample document. No personal information.";
+      ["MDP Living synthetic sample document. No personal information.", "MD One synthetic sample document. No personal information."].includes(data.toString());
     const did = id();
     this.run(
       "INSERT INTO documents VALUES(?,?,?,?,?,?,?,?,?)",
