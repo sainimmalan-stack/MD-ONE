@@ -90,12 +90,14 @@ export function GroceryStorefront({
   go,
   onCart,
   count,
+  hosted = false,
 }: {
   data: R;
   renderProduct: (p: R) => ReactNode;
   go: (tab: string) => void;
   onCart: () => void;
   count: number;
+  hosted?: boolean;
 }) {
   const [category, setCategory] = useState("All"),
     [search, setSearch] = useState(""),
@@ -281,7 +283,7 @@ export function GroceryStorefront({
               aria-pressed={range === "all"}
               onClick={() => setRange("all")}
             >
-              Planned range
+              {hosted ? "All products" : "Planned range"}
             </button>
           </div>
           <span>{filtered.length} products</span>
@@ -289,7 +291,7 @@ export function GroceryStorefront({
             <button onClick={() => setCategory("All")}>Clear category</button>
           )}
         </div>
-        {range === "all" && (
+        {range === "all" && !hosted && (
           <p className="daily-notice">
             Proposed products have indicative prices and cannot be ordered until
             stocked. Images are illustrative, not supplier packaging.
@@ -321,7 +323,7 @@ export function GroceryStorefront({
           illustrative.
         </p>
       </section>
-      <section className="daily-living">
+      {!hosted && <section className="daily-living">
         <div className="daily-section-heading">
           <div>
             <span>Beyond the basket</span>
@@ -378,7 +380,7 @@ export function GroceryStorefront({
             Events <ArrowUpRight size={14} />
           </button>
         </div>
-      </section>
+      </section>}
     </div>
   );
 }
