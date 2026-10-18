@@ -210,3 +210,111 @@ test("RPC adapter waits for the distributed lease and refuses an unconfirmed com
     globalThis.fetch = original;
   }
 });
+
+test("the renamed built-in MD One sample is downloadable; arbitrary text stays quarantined", async () => {
+  const sessions = new DurableShowcaseSessions(
+    new MemoryShowcaseStore(),
+    secret(),
+  );
+  await sessions.run(undefined, true, async (state) =>
+    withSyntheticVault(state.vaultKey, () => {
+      const service = new Service(state.db),
+        login = service.login("resident");
+      state.db
+        .prepare("UPDATE sessions SET stepup_until=?")
+        .run(new Date(Date.now() + 300000).toISOString());
+      const user = service.auth(login.token);
+      const sample = service.upload(user, {
+        name: "Sample property record.txt",
+        folder: "Property",
+        mime: "text/plain",
+        data: Buffer.from(
+          "MD One synthetic sample document. No personal information.",
+        ).toString("base64"),
+      });
+      assert.equal(sample.status, "clean");
+      assert.equal(
+        service.document(user, sample.id).data.toString(),
+        "MD One synthetic sample document. No personal information.",
+      );
+      const other = service.upload(user, {
+        name: "not-sample.txt",
+        folder: "Property",
+        mime: "text/plain",
+        data: Buffer.from("unverified content").toString("base64"),
+      });
+      assert.equal(other.status, "quarantined");
+      assert.throws(() => service.document(user, other.id), /quarantined/);
+    }),
+  );
+});
+
+test("new workers carry grocery checkout through delivery and a service request through technician completion", async () => {
+  const { Social } = await import("../lib/social.ts");
+  const store = new MemoryShowcaseStore(),
+    key = secret();
+  let token: string | undefined;
+  const run = async (
+    actor: string,
+    work: (s: Service, u: Record<string, any>) => any,
+  ) => {
+    const worker = new DurableShowcaseSessions(store, key);
+    const outcome = await worker.run(token, !token, async (session) =>
+      withSyntheticVault(session.vaultKey, () => {
+        const service = new Service(session.db),
+          signed = service.login(actor);
+        return work(service, service.auth(signed.token));
+      }),
+    );
+    token = outcome.token;
+    return outcome.result;
+  };
+  const order = await run("resident", (s, u) =>
+    s.checkout(u, {
+      flatId: "f1",
+      key: "durable-checkout",
+      items: [{ id: "milk", qty: 1 }],
+      payment: "cod",
+      substitution: "none",
+      slot: s.slots()[0].id,
+    }),
+  );
+  for (const status of ["picking", "packed"])
+    await run("warehouse", (s, u) => s.updateOrder(u, order.id, { status }));
+  await run("warehouse", (s, u) =>
+    s.updateOrder(u, order.id, { status: "out_for_delivery", riderId: "r1" }),
+  );
+  await run("rider1", (s, u) =>
+    s.updateOrder(u, order.id, { status: "delivered", otp: "123456" }),
+  );
+  await run("resident", (s, u) =>
+    assert.equal(
+      s.orders(u).find((o) => o.id === order.id)?.status,
+      "delivered",
+    ),
+  );
+  const request = await run("resident", (s, u) =>
+    new Social(s).requestService(u, {
+      flatId: "f1",
+      categoryId: "plumbing",
+      description: "Synthetic durable tap repair",
+      preferred: "Tomorrow",
+    }),
+  );
+  await run("service", (s, u) =>
+    new Social(s).serviceAction(u, request.id, {
+      status: "assigned",
+      technicianId: "t1",
+    }),
+  );
+  for (const status of ["en_route", "in_progress", "completed"])
+    await run("tech1", (s, u) =>
+      new Social(s).serviceAction(u, request.id, { status }),
+    );
+  await run("resident", (s, u) =>
+    assert.equal(
+      new Social(s).serviceRequests(u).find((r) => r.id === request.id)?.status,
+      "completed",
+    ),
+  );
+});
