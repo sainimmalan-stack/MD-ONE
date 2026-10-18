@@ -44,10 +44,19 @@ begin
  perform set_config('request.jwt.claim.sub',v::text,true);perform public.community_api('homes/'||home||'/action','POST','{"action":"interest"}');res:=public.community_api('homes/'||home);if res->>'contact'<>'' or res ? 'flat_id' then raise exception 'Home phone/address leak';end if;select id into hi from public.home_interests where listing_id=home and user_id=v;
  perform set_config('request.jwt.claim.sub',u::text,true);perform public.community_api('homes/'||home||'/action','POST',jsonb_build_object('action','accept','requestId',hi));
  perform set_config('request.jwt.claim.sub',v::text,true);if public.community_api('homes/'||home)->>'contact'<>'1234567890' then raise exception 'Accepted home contact missing';end if;perform public.community_api('homes/'||home||'/action','POST','{"action":"withdraw"}');if public.community_api('homes/'||home)->>'contact'<>'' then raise exception 'Home phone revoke failed';end if;
+ -- Restore a ride connection, then block: the accepted seat must be released.
+ perform public.community_api('rides/'||ride,'PATCH','{"action":"request"}');
+ perform set_config('request.jwt.claim.sub',u::text,true);perform public.community_api('rides/'||ride,'PATCH',jsonb_build_object('action','accept','requestId',rid));
+ perform set_config('request.jwt.claim.sub',v::text,true);
  perform public.community_api('blocks/'||u,'POST','{}');
+ if (select seats from public.rides where id=ride)<>1 then raise exception 'Block did not release accepted seat';end if;
+ -- Simulate a foreign image reference inserted through a legacy client table path.
+ update public.social_profiles set avatar_key=media::text,locked=false,discoverable=true,network_visible=true where user_id=w;
+ insert into public.posts(project_id,user_id,body,visibility,image_key) values(p,w,'TEST foreign photo reference','project',media::text);
+ 
  bad:=false;begin perform public.community_api('profiles/'||u);exception when others then bad:=true;end;if not bad then raise exception 'Blocked profile visible';end if;
  bad:=false;begin perform public.community_api('exchange/conversations/'||conv);exception when others then bad:=true;end;if not bad then raise exception 'Blocked conversation visible';end if;
- bad:=false;begin perform public.community_media_get(media);exception when others then bad:=true;end;if not bad then raise exception 'Blocked photo visible';end if;
+ bad:=false;begin perform public.community_media_get(media);exception when others then bad:=true;end;if not bad then raise exception 'Blocked or foreign-reference photo visible';end if;
  perform set_config('request.jwt.claim.sub',outsider::text,true);res:=public.community_api('community');if jsonb_array_length(res->'social'->'feed')<>0 or jsonb_array_length(res->'rides')<>0 then raise exception 'Unverified feed leak';end if;
  bad:=false;begin perform public.community_api('social-posts','POST','{"body":"invalid","visibility":"project"}');exception when others then bad:=true;end;if not bad then raise exception 'Unverified post allowed';end if;
  bad:=false;begin perform public.community_api('homes','POST',jsonb_build_object('flatId',flat));exception when others then bad:=true;end;if not bad then raise exception 'Non-owner home allowed';end if;
