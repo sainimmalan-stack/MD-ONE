@@ -1176,7 +1176,7 @@ export function MyProject({ data }: { data: R }) {
     setAttached(null);
     setRedacted(null);
     setError("");
-    setForm({ kind, title, fields, initial });
+    setForm({ kind, title, fields, initial: {...initial,key:initial.key||key()} });
   }
   function send(endpoint: string, body: R) {
     return api(`my-project/${pid}/${endpoint}`, body);
@@ -1198,6 +1198,7 @@ export function MyProject({ data }: { data: R }) {
     else if (form?.kind === "expense")
       await send("expenses", {
         ...v,
+        key:form.initial.key,
         amount: Math.round(v.amount * 100),
         rate: Math.round((v.rate || 0) * 100),
         attachmentId: attached?.id,
@@ -1219,7 +1220,7 @@ export function MyProject({ data }: { data: R }) {
     else if (form?.kind === "question")
       await send("questions", { ...v, attachmentId: attached?.id });
     else if (form?.kind === "adjustment")
-      await send("adjustments", { ...v, amount: Math.round(v.amount * 100) });
+      await send("adjustments", { ...v, key:form.initial.key, amount: Math.round(v.amount * 100) });
     else if (form?.kind === "liability")
       await send("settings", {
         ...v,
@@ -1234,6 +1235,7 @@ export function MyProject({ data }: { data: R }) {
         key: form.initial.key,
       });
     else if (form?.kind === "verify") await send("verify-payment", v);
+    else if (form?.kind === "reject-proof") await send("verify-payment", {...v,action:"reject"});
     else if (form?.kind === "operation")
       await send("operations", {
         kind: form.initial.kind,
@@ -1254,7 +1256,7 @@ export function MyProject({ data }: { data: R }) {
         },
       });
     else if (form?.kind === "credit")
-      await send("apply-credit", { ...v, amount: Math.round(v.amount * 100) });
+      await send("apply-credit", { ...v, key:form.initial.key, amount: Math.round(v.amount * 100) });
     setForm(null);
   }
   const amount = { name: "amount", label: "Amount ₹", type: "number" },
@@ -1706,7 +1708,7 @@ export function MyProject({ data }: { data: R }) {
                     onClick={() =>
                       download(
                         `receipt-${r.id}.txt`,
-                        `${w.project.name}\nCommittee-verified receipt ${r.id}\nDate ${r.date}\nAmount ${money(r.amount)}\nAllocated ${money(r.allocated)}\nVerified by ${r.verified_by}\nLocal synthetic demo receipt`,
+                        `${w.project.name}\nCommittee-verified receipt ${r.id}\nDate ${r.date}\nAmount ${money(r.amount)}\nAllocated ${money(r.allocated)}\nVerified by ${r.verified_by}\n${data.hosted ? "Project committee record · not a bank receipt" : "Local synthetic demo receipt"}`,
                         "text/plain",
                       )
                     }
@@ -1841,7 +1843,7 @@ export function MyProject({ data }: { data: R }) {
                   </span>
                   <h2>Monthly account statement</h2>
                   <p>
-                    {selectedMonth} · {account.state} · synthetic local records
+                    {selectedMonth} · {account.state} · {data.hosted ? "project committee records" : "synthetic local records"}
                   </p>
                 </div>
                 <Building2 size={36} />
@@ -2743,6 +2745,7 @@ export function MyProject({ data }: { data: R }) {
                       >
                         Verify receipt
                       </button>
+                      {data.hosted&&<button disabled={busy} onClick={()=>record("reject-proof","Reject unconfirmed payment proof",[{name:"reason",label:"Reason for the resident",type:"textarea"}],{id:s.id})}>Reject proof</button>}
                     </div>
                   ))}
                 {!pending && <p>No payment proofs awaiting verification.</p>}
@@ -2871,8 +2874,7 @@ export function MyProject({ data }: { data: R }) {
                   : "Private supporting attachment"}
               </h3>
               <p>
-                PDF, PNG or JPEG · up to 2 MB. Stored encrypted in this local
-                demo. Use reviewed, clean files.
+                {data.hosted ? "JPEG/PNG photos are prepared as private images. PDFs stay quarantined until a scanner verifies them. Up to 2 MB." : "PDF, PNG or JPEG · up to 2 MB. Stored encrypted in this local demo. Use reviewed, clean files."}
               </p>
               <input
                 aria-label="Private attachment"
@@ -2883,7 +2885,7 @@ export function MyProject({ data }: { data: R }) {
                   if (f) act(async () => setAttached(await attachment(pid, f)));
                 }}
               />
-              {attached && <Badge>{attached.name} attached</Badge>}
+              {attached && <Badge>{attached.name} · {data.hosted && attached.scan_state==="quarantined"?"Awaiting PDF verification":"attached"}</Badge>}
               {form.kind === "expense" && (
                 <>
                   <h3>Resident-safe, redacted copy (optional)</h3>
@@ -2903,7 +2905,7 @@ export function MyProject({ data }: { data: R }) {
                         );
                     }}
                   />
-                  {redacted && <Badge>{redacted.name} attached</Badge>}
+                  {redacted && <Badge>{redacted.name} · {data.hosted && redacted.scan_state==="quarantined"?"Awaiting PDF verification":"attached"}</Badge>}
                 </>
               )}
             </div>
@@ -3161,7 +3163,7 @@ export function CommunityHome({
     </section>
   );
 }
-export function AppointmentDesk() {
+export function AppointmentDesk({hosted=false}:{hosted?:boolean}={}) {
   const [options, setOptions] = useState<R>({ projects: [], residents: [] }),
     [rows, setRows] = useState<R[]>([]),
     [reports, setReports] = useState<R[]>([]),
@@ -3171,7 +3173,7 @@ export function AppointmentDesk() {
   async function load() {
     setRows(await api("appointments"));
     setOptions(await api("appointment-options"));
-    setReports(await api("exchange-moderation"));
+    if(!hosted)setReports(await api("exchange-moderation"));
   }
   useEffect(() => {
     load().catch((e) => setError(e.message));
@@ -3192,12 +3194,13 @@ export function AppointmentDesk() {
     <section className="cm-panel">
       <div className="cm-between">
         <h2>Project appointment administration</h2>
-        <button onClick={() => setForm(true)}>Invite a committee member</button>
+        <button disabled={hosted&&!options.residents.length} onClick={() => setForm(true)}>Invite a committee member</button>
       </div>
       <p>
         Appointment authority grants no access to project accounts, bills,
-        proofs or personal vaults. These are synthetic demo appointments.
+        proofs or personal vaults. {hosted ? "Invitations require resident acceptance before activation." : "These are synthetic demo appointments."}
       </p>
+      {hosted&&!options.residents.length&&<p>Verify actual project residents or owners before inviting committee representatives. Residence requests can be reviewed in Store desk.</p>}
       {error && <p className="cm-error">{error}</p>}
       {rows.map((a) => (
         <div className="cm-ledger-row" key={a.id}>
@@ -3275,8 +3278,8 @@ export function AppointmentDesk() {
           }
         />
       )}
-      <h3>Exchange moderation</h3>
-      {!reports.length && <p>No open reports.</p>}
+      {!hosted&&<h3>Exchange moderation</h3>}
+      {!hosted&&!reports.length && <p>No open reports.</p>}
       {reports.map((r) => (
         <div className="cm-ledger-row" key={r.id}>
           <span>

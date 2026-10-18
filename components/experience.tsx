@@ -1809,6 +1809,7 @@ export function InstaServices({ data, act, busy }: Props) {
   const [booking, setBooking] = useState<R | null>(null),
     [view, setView] = useState("explore");
   const s = data.social;
+  const [bookingKey,setBookingKey]=useState("");
   return (
     <div className="experience">
       <div className="exp-service-hero">
@@ -1890,7 +1891,7 @@ export function InstaServices({ data, act, busy }: Props) {
                 <button
                   className={`exp-service-card service-tone-${i % 4}`}
                   key={c.id}
-                  onClick={() => setBooking(c)}
+                  onClick={() => {setBooking(c);setBookingKey(crypto.randomUUID());}}
                 >
                   <span className="exp-service-number">0{i + 1}</span>
                   <span className="exp-service-icon">
@@ -1899,7 +1900,7 @@ export function InstaServices({ data, act, busy }: Props) {
                   <h3>{c.name}</h3>
                   <p>{c.description}</p>
                   <span className="exp-service-card-bottom">
-                    Request a specialist
+                    {data.hosted && !c.available ? "View service details" : "Request a specialist"}
                     <ArrowUpRight size={17} />
                   </span>
                 </button>
@@ -1959,8 +1960,7 @@ export function InstaServices({ data, act, busy }: Props) {
       <div className="exp-private-note">
         <ShieldCheck size={18} />
         <p>
-          Local demo: no real technician is dispatched. MDP must confirm service
-          coverage, availability, scope and any charges before real work.
+          {data.hosted ? "Requests reach the MDP service desk. Coverage, availability, scope, visit and any charges must be confirmed before work." : "Local demo: no real technician is dispatched. MDP must confirm service coverage, availability, scope and any charges before real work."}
           “Insta” means a quick request; arrival time is never guaranteed.
         </p>
       </div>
@@ -1976,6 +1976,7 @@ export function InstaServices({ data, act, busy }: Props) {
               const r = await act(
                 () =>
                   request("insta-services", "POST", {
+                    ...(data.hosted ? {key:bookingKey} : {}),
                     flatId: f.get("flat"),
                     categoryId: booking.id,
                     description: f.get("description"),
@@ -1990,10 +1991,11 @@ export function InstaServices({ data, act, busy }: Props) {
               }
             }}
           >
+            <p className="exp-form-note">{booking.description}{data.hosted&&!booking.available ? " Requests are not open for a verified home on your account. MDP must enable project coverage before a booking can be submitted." : ""}</p>
             <Label title="Your MDP home">
               <select name="flat">
                 {data.memberships
-                  .filter((m: R) => m.status === "approved")
+                  .filter((m: R) => m.status === "approved" && (!data.hosted || booking.projectIds?.includes(m.project_id)))
                   .map((m: R) => (
                     <option key={m.id} value={m.flat_id}>
                       {m.project} · {m.label}
@@ -2035,7 +2037,7 @@ export function InstaServices({ data, act, busy }: Props) {
               For emergencies, contact local emergency services directly. This
               request is not an emergency dispatch.
             </p>
-            <button className="exp-primary full" disabled={busy}>
+            <button className="exp-primary full" disabled={busy || (data.hosted && !booking.available)}>
               Request an MDP specialist <ArrowUpRight size={17} />
             </button>
           </form>
@@ -2096,7 +2098,7 @@ function ServiceRequest({ r, children }: { r: R; children?: ReactNode }) {
           <ShieldCheck size={16} />
           <span>
             {r.technician}
-            <small>Assigned by the demo MDP service desk</small>
+            <small>{r.hosted ? "Assigned by the MDP service desk" : "Assigned by the demo MDP service desk"}</small>
           </span>
         </div>
       )}
@@ -2137,7 +2139,7 @@ export function ServiceDesk({ data, act, busy }: Props) {
               : "Coordinate specialist requests across completed and ongoing MDP projects."}
           </p>
         </div>
-        <Pill>DEMO DISPATCH</Pill>
+        <Pill>{data.hosted ? "SERVICE OPERATIONS" : "DEMO DISPATCH"}</Pill>
       </div>
       {error && <div className="alert error">{error}</div>}
       {ops ? (
@@ -2169,7 +2171,7 @@ export function ServiceDesk({ data, act, busy }: Props) {
                       Choose a {r.category.toLowerCase()} specialist
                     </option>
                     {ops.technicians
-                      .filter((t: R) => t.trade === r.category_id)
+                      .filter((t: R) => t.trade === r.category_id && (!data.hosted || t.on_shift))
                       .map((t: R) => (
                         <option key={t.id} value={t.id}>
                           {t.name}
