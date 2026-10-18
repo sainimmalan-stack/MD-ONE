@@ -540,3 +540,4 @@ label {
 @media (max-width: 1000px) {
   .sidebar:not(.open) { box-shadow: none; }
 }
+.md-brand .md-brand-product img{display:block;width:29px;height:32px;max-width:29px;object-fit:contain;flex:0 0 29px}
