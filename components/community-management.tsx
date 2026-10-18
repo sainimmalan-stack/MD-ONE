@@ -238,8 +238,9 @@ async function attachment(pid: string, f: File, redacted = false) {
 export function Exchange(props: {
   data: R;
   openProfile?: (id: string) => void;
+  initialSection?: string;
 }) {
-  const [section, setSection] = useState("items");
+  const [section, setSection] = useState(props.initialSection || "items");
   return (
     <div className="marketplace-shell">
       <header className="marketplace-heading">
@@ -365,8 +366,8 @@ function ItemExchange({
   return (
     <div className="cm-page">
       <Banner
-        eyebrow="LESS WASTE. MORE NEIGHBOURHOOD."
-        title="Good things. New homes."
+        eyebrow=""
+        title="Buy & sell"
         body="Buy, sell, swap or give a little joy to someone nearby."
       >
         <button

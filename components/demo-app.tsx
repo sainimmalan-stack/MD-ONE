@@ -3,6 +3,7 @@ import { appFetch, appApiUrl } from "@/lib/app-fetch";
 import { GroceryStorefront, ProductArt } from "@/components/grocery-storefront";
 import { useBasket } from "@/components/use-basket";
 import { basketKey } from "@/lib/basket";
+import { LivingHome } from "./living-home";
 import { BrandLockup } from "@/components/brand-lockup";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Carpool } from "@/components/carpool";
@@ -112,17 +113,13 @@ const personas = [
   ["platform", "Platform operations"],
 ];
 const nav = [
-  ["home", "Daily", ShoppingBasket, "నిత్యావసరాలు"],
-  ["services", "Services", Wrench, "సేవలు"],
-  ["circle", "Community", Users, "మన కమ్యూనిటీ"],
-  ["myproject", "My Project", LayoutDashboard, "నా ప్రాజెక్ట్"],
-  ["myhome", "My Home", FolderLock, "నా ఇల్లు"],
+ ["home", "Home", Home, "హోమ్"],
+ ["orders", "Orders", ShoppingBasket, "ఆర్డర్లు"],
+ ["circle", "Community", Users, "మన కమ్యూనిటీ"],
+ ["profile", "Account", Settings, "ఖాతా"],
 ] as const;
 const sectionNavigation: Record<string, [string, string][]> = {
-  home: [
-    ["home", "Daily store"],
-    ["essentials", "Catalogue & orders"],
-  ],
+  daily: [["daily", "Groceries"], ["orders", "My orders"]],
   circle: [
     ["circle", "Neighbours"],
     ["exchange", "Marketplace"],
@@ -137,7 +134,8 @@ const sectionNavigation: Record<string, [string, string][]> = {
   ],
 };
 function navigationGroup(tab: string) {
-  if (["home", "essentials"].includes(tab)) return "home";
+  if (["daily", "essentials", "orders"].includes(tab)) return "orders";
+  if (tab === "home") return "home";
   if (
     [
       "circle",
@@ -149,7 +147,8 @@ function navigationGroup(tab: string) {
     ].includes(tab)
   )
     return "circle";
-  if (["myhome", "finance", "profile"].includes(tab)) return "myhome";
+  if (["myhome", "finance", "profile", "myproject", "services"].includes(tab)) return "profile";
+  if (tab === "homes") return "circle";
   return tab;
 }
 
@@ -409,7 +408,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
   const te = data?.preferences.language === "te";
   const isResident = data?.user.role === "resident";
   const activeGroup = navigationGroup(tab);
-  const sectionLinks = isResident ? sectionNavigation[activeGroup] || [] : [];
+  const sectionLinks = isResident && tab !== "home" ? sectionNavigation[tab === "daily" || tab === "orders" || tab === "essentials" ? "daily" : activeGroup] || [] : [];
   const ownNav = isResident
     ? nav
     : ([
@@ -418,7 +417,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
       ] as const);
   return (
     <div
-      className={cx("app-shell", showcase && "md-showcase")}
+      className={cx("app-shell living-shell", showcase && "md-showcase")}
       onClickCapture={
         showcase
           ? (e) => {
@@ -437,11 +436,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
     >
       {showcase && (
         <div className="showcase-ribbon">
-          <span>
-            <b>DEMO PREVIEW</b> · Synthetic people, money & orders. Never enter
-            personal IDs or files. Temporary session may reset after inactivity
-            or a server restart.
-          </span>
+          <details className="showcase-explanation"><summary>Demo preview · Sample data</summary><p>Synthetic people, money & orders. Never enter personal IDs or files. Temporary session may reset after inactivity or a server restart.</p></details>
           <div>
             <button
               disabled={busy}
@@ -554,13 +549,6 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
         </div>
         <header className="topbar">
           <div className="location">
-            <button
-              className="icon-button mobile-menu"
-              aria-label="Open navigation"
-              onClick={() => setMenu(!menu)}
-            >
-              <Menu />
-            </button>
             <a
               className="header-brand"
               href="#"
@@ -580,7 +568,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
                 My Dream Projects · MD One
               </small>
               <button onClick={() => go("profile")}>
-                {data?.active?.project || "My Dream Projects"}{" "}
+                {data?.active ? `${data.active.project} · ${data.active.label}` : "My Dream Projects"}{" "}
                 <ChevronDown size={14} />
               </button>
             </div>
@@ -684,14 +672,16 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
                   {tab === "myproject" && data.social && (
                     <MyProject key={data.user.id} data={data} />
                   )}
-                  {tab === "exchange" && data.social && (
+                  {["exchange", "homes"].includes(tab) && data.social && (
                     <Exchange
-                      key={data.user.id}
+                      initialSection={tab === "homes" ? "homes" : "items"}
+                      key={data.user.id + tab}
                       data={data}
                       openProfile={openProfile}
                     />
                   )}
-                  {tab === "home" && data.social && (
+                  {tab === "home" && <LivingHome name={data.user.name} orders={data.orders} go={go} onBasket={() => setCartOpen(true)} count={count}/> }
+                  {tab === "daily" && data.social && (
                     <>
                       <GroceryStorefront
                         data={data}
@@ -707,12 +697,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
                           />
                         )}
                       />
-                      <CommunityHome
-                        key={data.user.id}
-                        userId={data.user.id}
-                        data={data}
-                        go={go}
-                      />
+
                     </>
                   )}
                   {tab === "retail-plan" &&
@@ -750,8 +735,10 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
                         go={go}
                       />
                     )}
-                  {tab === "essentials" && (
+                  {["essentials", "orders"].includes(tab) && (
                     <Essentials
+                      key={tab}
+                      initialView={tab === "orders" ? "orders" : "shop"}
                       data={data}
                       cart={cart}
                       add={add}
@@ -954,6 +941,7 @@ function Product({
   );
 }
 function Essentials({
+  initialView = "shop",
   data,
   cart,
   add,
@@ -965,7 +953,7 @@ function Essentials({
   busy,
 }: any) {
   const [category, setCategory] = useState("All essentials"),
-    [view, setView] = useState("shop");
+    [view, setView] = useState(initialView);
   const cats = [
     "All essentials",
     ...new Set(data.products.map((p: R) => p.category)),

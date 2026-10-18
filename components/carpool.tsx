@@ -86,8 +86,7 @@ export function Carpool({ data, act, busy, api }: any) {
         <div>
           <span className="eyebrow">MD One CONNECT / NEIGHBOURHOOD RIDES</span>
           <h1>
-            A familiar face.
-            <br />A shared direction<span className="gold-dot">.</span>
+            Carpool<span className="gold-dot">.</span>
           </h1>
           <p>
             Find neighbours going your way. Connect, then make your own
@@ -100,29 +99,8 @@ export function Carpool({ data, act, busy, api }: any) {
           onClick={() => setOffer(true)}
         >
           <Plus size={17} />
-          Offer a journey
+          Offer a ride
         </button>
-      </div>
-      <div className="connect-hero">
-        <div>
-          <span className="eyebrow">
-            <ShieldCheck size={15} /> YOUR COMMUNITY. YOUR CONNECTIONS.
-          </span>
-          <h2>
-            Good company
-            <br />
-            starts close to home.
-          </h2>
-          <p>
-            Discover a commute. Send a request. Connect when you both say yes.
-          </p>
-          <div className="connect-steps">
-            <span>01 · Discover</span>
-            <span>02 · Connect</span>
-            <span>03 · Go together</span>
-          </div>
-        </div>
-        <CarFront className="connect-car" size={180} strokeWidth={0.8} />
       </div>
       <div className="connect-search panel">
         <label>
@@ -391,7 +369,7 @@ export function Carpool({ data, act, busy, api }: any) {
             className="modal"
             role="dialog"
             aria-modal="true"
-            aria-label="Offer a journey"
+            aria-label="Offer a ride"
           >
             <button className="text-link" onClick={() => setOffer(false)}>
               Close

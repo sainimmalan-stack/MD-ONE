@@ -638,8 +638,8 @@ function Finance({ data, act, busy, view }: any) {
     </>
   );
 }
-export function HostedPersonal({onAccount}:{onAccount:()=>void}){
- const [data,setData]=useState<R|null>(null),[view,setView]=useState('documents'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
+export function HostedPersonal({onAccount,initialView='documents'}:{onAccount:()=>void;initialView?:string}){
+ const [data,setData]=useState<R|null>(null),[view,setView]=useState(initialView),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const lock=useRef(false);
  const load=useCallback(async()=>setData(await api('')),[]);
  useEffect(()=>{void load().catch(e=>setError(e.message));},[load]);

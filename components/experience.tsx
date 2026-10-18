@@ -1813,58 +1813,7 @@ export function InstaServices({ data, act, busy }: Props) {
   const [bookingKey,setBookingKey]=useState("");
   return (
     <div className="experience">
-      <div className="exp-service-hero">
-        <div>
-          <span className="exp-kicker">
-            <span className="live-dot" />
-            YOUR BUILDER. STILL BY YOUR SIDE.
-          </span>
-          <h1>
-            Consider it
-            <br />
-            <em>taken care of.</em>
-          </h1>
-          <p>
-            From a dripping tap to the finishing touches.
-            <br />
-            Request a specialist, coordinated by My Dream Projects.
-          </p>
-          <div className="exp-service-promise">
-            <span>
-              <ShieldCheck size={15} />
-              MDP-coordinated
-            </span>
-            <span>
-              <Building2 size={15} />
-              For MDP homes
-            </span>
-            <span>
-              <Clock3 size={15} />
-              Tracked from request to done
-            </span>
-          </div>
-        </div>
-        <div className="exp-service-graphic">
-          <div className="service-orbit so1" />
-          <div className="service-orbit so2" />
-          <span className="service-center">
-            <Wrench size={51} strokeWidth={1.3} />
-          </span>
-          <span className="service-floating sf1">
-            <Droplets size={25} />
-          </span>
-          <span className="service-floating sf2">
-            <Zap size={25} />
-          </span>
-          <span className="service-floating sf3">
-            <Grid2X2 size={25} />
-          </span>
-          <span className="service-floating sf4">
-            <Paintbrush size={25} />
-          </span>
-          <span className="service-graphic-label">MDP / INSTA SERVICES</span>
-        </div>
-      </div>
+      <header className="living-feature-heading"><h1>Home services</h1><p>Choose a specialist for your home.</p></header>
       <div className="exp-filter-tabs circle-tabs">
         <button
           className={view === "explore" ? "selected" : ""}
@@ -1882,8 +1831,8 @@ export function InstaServices({ data, act, busy }: Props) {
       {view === "explore" ? (
         <>
           <Title
-            kicker="ONE TRUSTED TEAM. EVERY LITTLE FIX."
-            title="What does your home need?"
+            kicker=""
+            title="Choose a service"
           />
           <div className="exp-service-grid">
             {s.services.map((c: R, i: number) => {
