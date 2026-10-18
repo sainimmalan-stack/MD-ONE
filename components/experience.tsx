@@ -830,7 +830,7 @@ export function SocialCircle({
             neighbours.
           </p>
         </div>
-        <button className="exp-secondary" onClick={() => setComposer(true)}>
+        <button className="exp-secondary" disabled={data.hosted && !data.eligible} onClick={() => setComposer(true)}>
           <Plus size={17} />
           Share a moment
         </button>
@@ -860,12 +860,14 @@ export function SocialCircle({
             <>
               <button
                 className="exp-compose-trigger"
+                disabled={data.hosted && !data.eligible}
                 onClick={() => setComposer(true)}
               >
                 <Avatar p={s.profile} />
                 <span>What’s happening in your little world?</span>
                 <ImagePlus size={20} />
               </button>
+              {data.hosted && !s.feed.length && <Nothing title="Your neighbourhood starts here" description="Posts shared with you will appear here. Your profile stays locked until you choose otherwise."/>}
               {s.feed.map((p: R) => (
                 <FeedPost
                   key={p.id}
@@ -1387,7 +1389,7 @@ export function ResidentProfile({
                 ) : (
                   <>
                     <ShieldCheck size={12} />
-                    VERIFIED DEMO RESIDENT
+                    {data.hosted ? (data.eligible ? 'VERIFIED RESIDENT' : data.owner ? 'PLATFORM OWNER' : 'MD ONE MEMBER') : 'VERIFIED DEMO RESIDENT'}
                   </>
                 )}
               </Pill>
@@ -1670,6 +1672,7 @@ function EditProfile({
           const r = await act(
             () =>
               request("my-profile", "POST", {
+                ...(data.hosted ? {name:f.get("name")} : {}),
                 bio: f.get("bio"),
                 occupation: f.get("occupation"),
                 contact: f.get("contact"),
@@ -1684,6 +1687,7 @@ function EditProfile({
           if (r) close();
         }}
       >
+        {data.hosted && <label>Your name<input name="name" required maxLength={80} defaultValue={p.name}/></label>}
         <div className="exp-avatar-upload">
           <Avatar p={{ ...p, avatar }} size="large" />
           <label className="exp-photo-button">

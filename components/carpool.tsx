@@ -179,7 +179,7 @@ export function Carpool({ data, act, busy, api }: any) {
       </div>
       {!data.services?.carpool ? (
         <div className="panel connect-empty">
-          Connections are not enabled for your project yet.
+          {data.hosted ? "Verify your residence to offer journeys and connect with neighbours." : "Connections are not enabled for your project yet."}
         </div>
       ) : !rides.length ? (
         <div className="panel connect-empty">
@@ -195,7 +195,7 @@ export function Carpool({ data, act, busy, api }: any) {
                 <span className="avatar pale">{r.driver[0]}</span>
                 <div className="grow">
                   <b>{r.driver}</b>
-                  <small>{r.project} · demo resident</small>
+                  <small>{r.project} · {data.hosted ? 'Verified resident' : 'demo resident'}</small>
                 </div>
                 <span className="badge">{r.seats} seats</span>
               </div>

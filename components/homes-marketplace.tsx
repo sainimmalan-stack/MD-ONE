@@ -634,8 +634,7 @@ export function HomesMarketplace({ data }: { data: R }) {
             )}
             <p className="home-description">{selected.description}</p>
             <p className="homes-note">
-              Listed by {selected.owner} · Ownership checked against the local
-              demo register. Exact flat number stays private.
+              Listed by {selected.owner} · Ownership checked against {data.hosted ? 'your verified MDP ownership record' : 'the local demo register'}. Exact flat number stays private.
             </p>
             {selected.own ? (
               <>
