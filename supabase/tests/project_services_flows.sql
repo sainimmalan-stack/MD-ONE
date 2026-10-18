@@ -1,0 +1,102 @@
+-- Non-production identities and all ledger/job fixtures are rolled back.
+begin;
+insert into auth.users(id,email) values('00000000-0000-4000-8000-000000000081','ops-81@example.invalid'),('00000000-0000-4000-8000-000000000082','ops-82@example.invalid'),('00000000-0000-4000-8000-000000000083','ops-83@example.invalid'),('00000000-0000-4000-8000-000000000084','ops-84@example.invalid'),('00000000-0000-4000-8000-000000000085','ops-85@example.invalid'),('00000000-0000-4000-8000-000000000086','ops-86@example.invalid');
+insert into private.staff(user_id,role) values('00000000-0000-4000-8000-000000000086','platform');
+do $$declare president uuid:='00000000-0000-4000-8000-000000000081';vp uuid:='00000000-0000-4000-8000-000000000082';resident uuid:='00000000-0000-4000-8000-000000000083';outsider uuid:='00000000-0000-4000-8000-000000000084';tech uuid:='00000000-0000-4000-8000-000000000085';platform uuid:='00000000-0000-4000-8000-000000000086';pid uuid;other uuid;flat uuid;flat2 uuid;period uuid;invoice uuid;proof uuid;bill uuid;job uuid;job2 uuid;t uuid;appt uuid;question uuid;poll uuid;image uuid;redacted uuid;res jsonb;body jsonb;again jsonb;statement jsonb;bad boolean;k text;route text;m text:=to_char(now() at time zone 'Asia/Kolkata','YYYY-MM');d text:=to_char(now() at time zone 'Asia/Kolkata','YYYY-MM-DD');
+begin
+ select id into pid from public.projects order by name limit 1;select id into other from public.projects where id<>pid order by name limit 1;
+ insert into public.flats(project_id,label) values(pid,'99994') returning id into flat;insert into public.flats(project_id,label) values(other,'99994') returning id into flat2;
+ insert into public.memberships(user_id,flat_id,kind,status) values(president,flat,'owner','approved'),(vp,flat,'household','approved'),(resident,flat,'tenant','approved'),(outsider,flat2,'tenant','approved');insert into public.ownership values(president,flat);
+ perform set_config('request.jwt.claim.sub',platform::text,true);
+ bad:=false;begin perform public.project_api('my-project/'||pid);exception when others then bad:=true;end;if not bad then raise exception 'Platform bypassed project privacy';end if;
+ for body in select jsonb_build_object('projectId',pid,'userId',v.uid,'position',v.position,'starts',d,'ends',((d::date)+365)::text,'action','invite') from (values(president,'president'),(vp,'vice_president')) v(uid,position) loop
+ perform set_config('request.jwt.claim.sub',platform::text,true);appt:=(public.project_api('appointments','POST',body)->>'id')::uuid;
+ bad:=false;begin perform public.project_api('appointments','POST',jsonb_build_object('id',appt,'action','activate'));exception when others then bad:=true;end;if not bad then raise exception 'Appointment activated without acceptance';end if;
+ perform set_config('request.jwt.claim.sub',body->>'userId',true);perform public.project_api('appointments','POST',jsonb_build_object('id',appt,'action','accept'));
+ perform set_config('request.jwt.claim.sub',platform::text,true);perform public.project_api('appointments','POST',jsonb_build_object('id',appt,'action','activate'));end loop;
+ perform set_config('request.jwt.claim.sub',president::text,true);route:='my-project/'||pid;
+ perform public.project_api(route||'/settings','POST',jsonb_build_object('mode','fixed','amount',250000,'dueDay',10,'startDate',m||'-01','enabled',true,'approved',true,'categories',jsonb_build_array('Security','Electricity','Generator diesel','Repairs'),'openingCash',1000000,'openingReserve',500000,'independentReview',true,'approvalThreshold',100000));
+ perform public.project_api(route||'/settings','POST',jsonb_build_object('action','liability','flatId',flat,'payerId',resident,'openingDue',0,'exemption',0));
+ period:=(public.project_api(route||'/billing','POST',jsonb_build_object('action','draft','month',m))->>'id')::uuid;
+ if (public.project_api(route||'/billing','POST',jsonb_build_object('action','draft','month',m))->>'id')::uuid<>period then raise exception 'Billing replay failed';end if;
+ select id into invoice from public.flat_invoices where period_id=period and flat_id=flat;
+ perform set_config('request.jwt.claim.sub',resident::text,true);res:=public.project_api(route);if jsonb_array_length(res->'invoices')<>0 then raise exception 'Draft invoice leaked';end if;
+ bad:=false;begin perform public.project_api(route||'/billing','POST',jsonb_build_object('action','publish','periodId',period));exception when others then bad:=true;end;if not bad then raise exception 'Resident published accounts';end if;
+ perform set_config('request.jwt.claim.sub',president::text,true);perform public.project_api(route||'/billing','POST',jsonb_build_object('action','review','periodId',period));perform public.project_api(route||'/billing','POST',jsonb_build_object('action','publish','periodId',period));
+ perform set_config('request.jwt.claim.sub',resident::text,true);res:=public.project_api(route);if jsonb_array_length(res->'invoices')<>1 or res->'invoices'->0->>'balance'<>'250000' then raise exception 'Published bill missing';end if;
+ image:=(public.project_image_attachment(pid,'TEST payment photo',1,1,'AAAA',false)->>'id')::uuid;
+ body:=jsonb_build_object('invoiceId',invoice,'amount',300000,'reference','TEST transfer 1','key',gen_random_uuid(),'attachmentId',image);
+ proof:=(public.project_api(route||'/payments','POST',body)->>'id')::uuid;again:=public.project_api(route||'/payments','POST',body);if (again->>'id')::uuid<>proof then raise exception 'Payment replay failed';end if;
+ bad:=false;begin perform public.project_api(route||'/payments','POST',body||'{"amount":350000}');exception when others then bad:=true;end;if not bad then raise exception 'Changed payment replay allowed';end if;
+ perform set_config('request.jwt.claim.sub',outsider::text,true);bad:=false;begin perform public.project_api(route||'/attachments/'||image);exception when others then bad:=true;end;if not bad then raise exception 'Cross-project attachment leak';end if;
+ perform set_config('request.jwt.claim.sub',vp::text,true);perform public.project_api(route||'/verify-payment','POST',jsonb_build_object('id',proof,'confirmed',true,'date',d));perform public.project_api(route||'/verify-payment','POST',jsonb_build_object('id',proof,'confirmed',true,'date',d));
+ if (select count(*) from public.project_receipts where submission_id=proof)<>1 or private.project_credit(pid,resident)<>50000 then raise exception 'Receipt allocation/replay failed';end if;
+ -- Rejected proof reserves no transfer reference and records no cash.
+ perform set_config('request.jwt.claim.sub',resident::text,true);body:=jsonb_build_object('invoiceId',invoice,'amount',1000,'reference','TEST unconfirmed','key',gen_random_uuid());proof:=(public.project_api(route||'/payments','POST',body)->>'id')::uuid;
+ perform set_config('request.jwt.claim.sub',vp::text,true);perform public.project_api(route||'/verify-payment','POST',jsonb_build_object('id',proof,'action','reject','reason','No matching bank receipt'));
+ perform set_config('request.jwt.claim.sub',resident::text,true);proof:=(public.project_api(route||'/payments','POST',body||jsonb_build_object('key',gen_random_uuid()))->>'id')::uuid;
+ perform set_config('request.jwt.claim.sub',vp::text,true);perform public.project_api(route||'/verify-payment','POST',jsonb_build_object('id',proof,'action','reject','reason','Still unconfirmed'));
+ perform set_config('request.jwt.claim.sub',president::text,true);
+ body:=jsonb_build_object('invoiceId',invoice,'amount',20000,'reason','TEST corrected assessment','effectiveMonth',m,'key',gen_random_uuid());perform public.project_api(route||'/adjustments','POST',body);perform public.project_api(route||'/adjustments','POST',body);
+ body:=jsonb_build_object('invoiceId',invoice,'amount',20000,'key',gen_random_uuid());perform public.project_api(route||'/apply-credit','POST',body);perform public.project_api(route||'/apply-credit','POST',body);if private.project_credit(pid,resident)<>30000 then raise exception 'Credit replay failed';end if;
+ -- A credit allocated just after IST midnight belongs to the next month, even if UTC is still the previous day.
+ update public.credit_allocations set created_at=((m||'-01')::date+interval '1 month')::timestamp at time zone 'Asia/Kolkata' where project_id=pid;
+ select private.invoice_card(fi,(m||'-01')::date) into res from public.flat_invoices fi where fi.id=invoice;
+ if res->>'balance'<>'20000' then raise exception 'IST month cutoff failed';end if;
+ update public.credit_allocations set created_at=now() where project_id=pid;
+ redacted:=(public.project_image_attachment(pid,'TEST redacted expense',1,1,'////',true)->>'id')::uuid;
+ body:=jsonb_build_object('category','Security','description','TEST watchman cost','period',m,'vendor','TEST vendor','billDate',d,'billNumber','TEST bill 1','amount',100000,'dueDate',d,'key',gen_random_uuid(),'redactedAttachmentId',redacted);
+ bill:=(public.project_api(route||'/expenses','POST',body)->>'id')::uuid;if (public.project_api(route||'/expenses','POST',body)->>'id')::uuid<>bill then raise exception 'Expense replay failed';end if;
+ bad:=false;begin perform public.project_api(route||'/approve-expense','POST',jsonb_build_object('id',bill));exception when others then bad:=true;end;if not bad then raise exception 'Self-approved independent bill';end if;
+ perform set_config('request.jwt.claim.sub',vp::text,true);perform public.project_api(route||'/approve-expense','POST',jsonb_build_object('id',bill));
+ body:=jsonb_build_object('id',bill,'amount',100000,'date',d,'method','bank','reference','TEST vendor transfer','key',gen_random_uuid());perform public.project_api(route||'/pay-expense','POST',body);perform public.project_api(route||'/pay-expense','POST',body);
+ bad:=false;begin perform public.project_api(route||'/pay-expense','POST',body||jsonb_build_object('key',gen_random_uuid()));exception when others then bad:=true;end;if not bad then raise exception 'Vendor overpayment accepted';end if;
+ perform set_config('request.jwt.claim.sub',resident::text,true);res:=public.project_api(route);if (res->'bills'->0) ? 'vendor' or (res->'bills'->0) ? 'created_by' then raise exception 'Raw bill metadata leaked';end if;perform public.project_image_pixels(redacted);
+ question:=(public.project_api(route||'/questions','POST','{"category":"Repairs","subject":"TEST private issue","body":"TEST committee question","visibility":"private"}')->>'id')::uuid;
+ perform set_config('request.jwt.claim.sub',vp::text,true);perform public.project_api(route||'/questions/'||question,'POST','{"body":"TEST reply","status":"resolved"}');
+ perform set_config('request.jwt.claim.sub',outsider::text,true);bad:=false;begin perform public.project_api(route||'/questions/'||question,'POST','{"body":"bad"}');exception when others then bad:=true;end;if not bad then raise exception 'Cross-project question access';end if;
+ perform set_config('request.jwt.claim.sub',president::text,true);
+ body:=jsonb_build_object('action','reserve_transfer','fund','reserve','amount',100000,'date',d,'reference','TEST reserve','reason','TEST transfer','confirmed',true,'key',gen_random_uuid());perform public.project_api(route||'/cash','POST',body);perform public.project_api(route||'/cash','POST',body);
+ res:=public.project_api(route||'/accounts','GET','{}',jsonb_build_object('month',m));if res->>'opening'<>'1000000' or res->>'receipts'<>'300000' or res->>'payments'<>'100000' or res->>'closing'<>'1100000' or res->>'reserve'<>'600000' or res->>'receivables'<>'0' then raise exception 'Accounting identity failed: %',res;end if;
+ perform public.project_api(route||'/billing','POST',jsonb_build_object('action','close','periodId',period,'reconciled',true));statement:=public.project_api(route||'/accounts','GET','{}',jsonb_build_object('month',m));
+ bad:=false;begin perform public.project_api(route||'/cash','POST',body||jsonb_build_object('key',gen_random_uuid()));exception when others then bad:=true;end;if not bad then raise exception 'Closed-period posting allowed';end if;
+ if public.project_api(route||'/accounts','GET','{}',jsonb_build_object('month',m))<>statement then raise exception 'Closed snapshot changed';end if;
+ -- Self-payment verification must fail specifically on the independent-verifier rule.
+ insert into public.payment_submissions(project_id,user_id,invoice_id,amount,reference,request_key) values(pid,president,invoice,1,'TEST own proof','TEST own proof replay') returning id into proof;
+ bad:=false;begin perform public.project_api(route||'/verify-payment','POST',jsonb_build_object('id',proof,'confirmed',true,'date',d));exception when others then if sqlerrm like 'Another committee member%' then bad:=true;else raise;end if;end;if not bad then raise exception 'Own payment self-verified';end if;
+ bad:=false;begin perform public.project_api(route||'/settings','POST',jsonb_build_object('mode','fixed','amount',1,'dueDay',10,'approved',true));exception when others then bad:=true;end;if not bad then raise exception 'Missing facility policy accepted';end if;
+ bad:=false;begin perform public.project_api(route||'/operations','POST','{"kind":"poll","title":"bad","payload":{"options":["a","b"]}}');exception when others then bad:=true;end;if not bad then raise exception 'Poll without expiry accepted';end if;
+ bad:=false;begin perform public.project_api(route||'/operations','POST','{"kind":"asset","title":"bad","payload":{"category":"Repairs","renewal":"bad-date"}}');exception when others then bad:=true;end;if not bad then raise exception 'Invalid renewal stored';end if;
+ poll:=(public.project_api(route||'/operations','POST',jsonb_build_object('kind','poll','title','TEST project vote','payload',jsonb_build_object('options',jsonb_build_array('a','b'),'ends',now()+interval '1 day')))->>'id')::uuid;
+ perform set_config('request.jwt.claim.sub',resident::text,true);perform public.project_api(route||'/vote','POST',jsonb_build_object('id',poll,'choice','a'));perform public.project_api(route||'/vote','POST',jsonb_build_object('id',poll,'choice','b'));if (select count(*) from public.project_votes where operation_id=poll)<>1 then raise exception 'Duplicate poll vote';end if;
+ perform set_config('request.jwt.claim.sub',vp::text,true);perform public.project_api(route||'/questions/'||question,'POST',jsonb_build_object('assignedTo',president));perform public.project_api(route||'/questions/'||question,'POST','{"assignedTo":""}');
+ update public.committee_appointments set starts=(now() at time zone 'Asia/Kolkata')::date-1,ends=(now() at time zone 'Asia/Kolkata')::date where project_id=pid and user_id=vp;
+ bad:=false;begin perform public.project_api(route||'/operations','POST','{"kind":"notice","title":"bad","payload":{"body":"bad"}}');exception when others then bad:=true;end;if not bad then raise exception 'Expired committee wrote';end if;
+ -- Service staff setup and request lifecycle: no real technicians or dispatch retained.
+ perform set_config('request.jwt.claim.sub',platform::text,true);perform public.services_api('service-setup','POST',jsonb_build_object('action','coverage','projectId',pid,'categoryId','plumbing','enabled',true));
+ perform public.services_api('service-setup','POST','{"action":"technician","email":"ops-85@example.invalid","name":"TEST plumber","trade":"plumbing","onShift":true}');select id into t from public.technicians where user_id=tech;
+ perform set_config('request.jwt.claim.sub',resident::text,true);body:=jsonb_build_object('flatId',flat,'categoryId','plumbing','description','TEST leaking tap','preferred','TEST tomorrow','urgency','routine','key',gen_random_uuid());job:=(public.services_api('insta-services','POST',body)->>'id')::uuid;if (public.services_api('insta-services','POST',body)->>'id')::uuid<>job then raise exception 'Service replay failed';end if;
+ job2:=(public.services_api('insta-services','POST',body||jsonb_build_object('key',gen_random_uuid()))->>'id')::uuid;
+ perform set_config('request.jwt.claim.sub',platform::text,true);perform public.services_api('insta-services/'||job,'PATCH',jsonb_build_object('status','assigned','technicianId',t));
+ bad:=false;begin perform public.services_api('insta-services/'||job2,'PATCH',jsonb_build_object('status','assigned','technicianId',t));exception when others then bad:=true;end;if not bad then raise exception 'Technician double-booked';end if;
+ perform set_config('request.jwt.claim.sub',outsider::text,true);bad:=false;begin perform public.services_api('insta-services/'||job,'PATCH','{"status":"en_route"}');exception when others then bad:=true;end;if not bad then raise exception 'Unassigned user advanced job';end if;
+ perform set_config('request.jwt.claim.sub',tech::text,true);res:=public.services_api('service-ops');if jsonb_array_length(res->'requests')<>1 then raise exception 'Technician saw unassigned jobs';end if;
+ bad:=false;begin perform public.services_api('insta-services/'||job,'PATCH','{"status":"completed"}');exception when others then bad:=true;end;if not bad then raise exception 'Job skipped stages';end if;
+ perform public.services_api('insta-services/'||job,'PATCH','{"status":"en_route"}');perform public.services_api('insta-services/'||job,'PATCH','{"status":"in_progress"}');perform public.services_api('insta-services/'||job,'PATCH','{"status":"completed"}');perform public.services_api('insta-services/'||job,'PATCH','{"status":"completed"}');if (select count(*) from public.service_history where request_id=job)<>5 then raise exception 'Service timeline replay failed';end if;
+ perform set_config('request.jwt.claim.sub',resident::text,true);perform public.services_api('insta-services/'||job2,'PATCH','{"status":"cancelled"}');
+ bad:=false;begin perform public.services_api('insta-services','POST',body||jsonb_build_object('key',gen_random_uuid(),'categoryId','electrical'));exception when others then bad:=true;end;if not bad then raise exception 'Uncovered service accepted';end if;
+ -- Moved-out residents cannot be dispatched to an old flat.
+ perform set_config('request.jwt.claim.sub',resident::text,true);job2:=(public.services_api('insta-services','POST',body||jsonb_build_object('flatId',flat,'categoryId','plumbing','description','TEST moved-out request','preferred','TEST later','urgency','routine','key',gen_random_uuid()))->>'id')::uuid;
+ update public.memberships set status='expired' where user_id=resident and flat_id=flat;
+ perform set_config('request.jwt.claim.sub',platform::text,true);bad:=false;begin perform public.services_api('insta-services/'||job2,'PATCH',jsonb_build_object('status','assigned','technicianId',t));exception when others then bad:=true;end;if not bad then raise exception 'Moved-out request assigned';end if;
+ perform set_config('request.jwt.claim.sub',platform::text,true);bad:=false;begin perform public.project_api(route);exception when others then bad:=true;end;if not bad then raise exception 'Service operator accessed project finance';end if;
+end;$$;
+set local role authenticated;
+do $$begin
+ if exists(select 1 from public.flat_invoices) then raise exception 'Platform raw invoice bypass';end if;
+ if has_function_privilege('anon','public.project_api(text,text,jsonb,jsonb)','execute') or has_function_privilege('authenticated','public.project_api_internal(text,text,jsonb,jsonb)','execute') or has_table_privilege('authenticated','private.project_attachment_data','select') then raise exception 'Unsafe API/raw storage grant';end if;
+ perform public.operations_context();
+end;$$;
+reset role;
+select 'PASS: committee consent/scope, billing/publication, receipt/credit/payment replay, independent review, accounting identity, closed snapshot, private/redacted attachments/questions, service coverage, trade assignment, double-booking rejection and technician-only lifecycle' as result;
+rollback;
