@@ -7,7 +7,7 @@ import { Governance } from "@/lib/governance";
 import { Social } from "@/lib/social";
 import { Service, AppError, text, integer, fail } from "@/lib/service";
 import { amortize } from "@/lib/finance";
-import { SHOWCASE_PERSONAS, validateShowcaseInput } from "./showcase-policy";
+import { SHOWCASE_PERSONAS, SHOWCASE_STAFF_PERSONAS, validateShowcaseInput } from "./showcase-policy";
 const rate = new Map<string, { n: number; reset: number }>();
 export async function demoApi(
   req: NextRequest,
@@ -18,6 +18,7 @@ export async function demoApi(
     cookiePath: string;
     showcase?: boolean;
     runId?: string;
+    authorizeShowcaseStaff?: () => Promise<boolean>;
   },
 ) {
   try {
@@ -67,6 +68,8 @@ export async function demoApi(
       }
       if (options.showcase && !SHOWCASE_PERSONAS.has(b.actor))
         fail("Choose a listed demo persona.");
+      if (options.showcase && SHOWCASE_STAFF_PERSONAS.has(b.actor) && !(await options.authorizeShowcaseStaff?.()))
+        fail("Staff previews are restricted to the signed-in MD One founder.", 403);
       const result = s.login(text(b.actor));
       const res = json({
         user: result.user,
@@ -84,6 +87,8 @@ export async function demoApi(
     }
     if (p[0] === "health") return json({ ok: true, mode: "demo" });
     const u = s.auth(token);
+    if(options.showcase && u.role !== "resident" && !(await options.authorizeShowcaseStaff?.()))
+      fail("Sign in with the MD One founder account to use staff previews.",403);
     if (p[0] === "logout" && req.method === "POST") {
       s.run("DELETE FROM sessions WHERE token=?", hash(token));
       const res = json({ ok: true });
