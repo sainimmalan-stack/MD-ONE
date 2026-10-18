@@ -1,3 +1,4 @@
+import { hostedAuth, hostedEnabled } from "@/lib/hosted-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { getDb, hash, now, id } from "@/lib/db";
 import { communityApi } from "@/lib/community-api";
@@ -28,6 +29,7 @@ async function handle(
   req: NextRequest,
   ctx: { params: Promise<{ path: string[] }> },
 ) {
+  if (hostedEnabled()) return hostedAuth(req, (await ctx.params).path);
   try {
     local(req);
     const { path: p } = await ctx.params;
