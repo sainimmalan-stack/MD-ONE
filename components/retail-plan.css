@@ -1,0 +1,176 @@
+/* Operator planning is a financial workspace, separate from the storefront. */
+.rp-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.rp-stat {
+  display: grid;
+  gap: 9px;
+  padding: 20px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 13px;
+  min-width: 0;
+}
+.rp-stat > span {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.rp-stat > strong {
+  font-size: 28px;
+  font-weight: 550;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+.rp-stat > small {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.rp-category-mix {
+  display: grid;
+  gap: 18px;
+  margin: 24px 0;
+}
+.rp-category-mix > div > div:first-child {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+}
+.rp-category-mix strong {
+  font-weight: 500;
+}
+.rp-category-mix small {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.rp-category-mix b {
+  margin-left: auto;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+.rp-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+}
+.rp-track {
+  height: 3px;
+  background: var(--surface-selected);
+  margin-top: 10px;
+  border-radius: 2px;
+}
+.rp-track > span {
+  display: block;
+  height: 100%;
+  background: var(--text-secondary);
+  border-radius: 2px;
+}
+.rp-habit {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-default);
+}
+.rp-habit > svg {
+  width: 22px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.rp-habit strong {
+  font-size: 13px;
+  font-weight: 550;
+}
+.rp-habit p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.rp-scenario {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 24px;
+}
+.rp-economics {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+.rp-economics > p {
+  font-size: 11px;
+}
+.rp-economics .rp-stat {
+  padding: 18px;
+  background: var(--surface-base);
+}
+.rp-table-scroll {
+  overflow: auto;
+  margin-top: 24px;
+  max-width: 100%;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+}
+.rp-table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 11px;
+  min-width: 960px;
+  font-variant-numeric: tabular-nums;
+}
+.rp-table-scroll th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+  padding: 14px 12px;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.rp-table-scroll td {
+  padding: 15px 12px;
+  vertical-align: top;
+  border-top: 1px solid var(--border-default);
+  line-height: 1.65;
+}
+.rp-table-scroll td strong,
+.rp-table-scroll td small {
+  display: block;
+}
+.rp-table-scroll td small {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+.rp-table-scroll tbody tr:hover {
+  background: #ffffff03;
+}
+@media (max-width: 760px) {
+  .rp-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .rp-stat {
+    padding: 15px;
+  }
+  .rp-stat > strong {
+    font-size: 23px;
+  }
+  .rp-scenario {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .rp-category-mix > div > div:first-child {
+    flex-wrap: wrap;
+  }
+  .rp-category-mix strong {
+    font-size: 11px;
+  }
+  .rp-category-mix small {
+    display: none;
+  }
+}

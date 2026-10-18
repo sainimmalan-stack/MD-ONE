@@ -1,0 +1,634 @@
+.marketplace-mode {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--surface-overlay);
+  width: max-content;
+  margin-bottom: 25px;
+}
+.marketplace-mode button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: center;
+  min-height: 43px;
+  padding: 11px 20px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+}
+.marketplace-mode button[aria-pressed="true"] {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px #0001;
+}
+.marketplace-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+.marketplace-heading h1 {
+  font-size: 35px;
+  font-weight: 550;
+  letter-spacing: -1.3px;
+  margin: 0;
+}
+.marketplace-heading > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.marketplace-shell > .cm-page > .cm-banner {
+  padding-top: 0;
+}
+.marketplace-shell .cm-banner h1 {
+  font-size: 27px !important;
+}
+.homes-marketplace {
+  display: grid;
+  gap: 22px;
+}
+.homes-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.homes-overline {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.homes-intro h2 {
+  font-size: 27px;
+  letter-spacing: -0.8px;
+  font-weight: 500;
+  margin: 8px 0 10px;
+}
+.homes-intro p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.7;
+}
+.homes-marketplace button,
+.homes-dialog button {
+  cursor: pointer;
+  font: inherit;
+}
+.homes-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: var(--text-primary);
+  color: var(--surface-base);
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 17px;
+  min-height: 44px;
+  font-size: 12px !important;
+  white-space: nowrap;
+}
+.homes-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.homes-secondary,
+.homes-owner-actions button,
+.home-interest button,
+.homes-contact button,
+.homes-empty button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  min-height: 42px;
+  font-size: 12px;
+}
+.homes-tools {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-default);
+  padding-bottom: 15px;
+}
+.homes-intents {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+.homes-intents button {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 10px 14px;
+  min-height: 42px;
+}
+.homes-intents button[aria-pressed="true"] {
+  background: var(--surface-selected);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.homes-refresh {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  background: none;
+  border: 0;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.homes-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 0.65fr;
+  gap: 10px;
+}
+.homes-filters input,
+.homes-filters select {
+  width: 100%;
+  min-width: 0;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  font-size: 12px;
+}
+.homes-error {
+  color: var(--text-primary);
+  border-left: 3px solid var(--brand-orange);
+  padding: 12px;
+  background: var(--surface-overlay);
+  font-size: 12px;
+}
+.homes-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.homes-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  background: var(--surface-raised);
+  padding: 45px 25px;
+  gap: 14px;
+}
+.homes-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  border: 1px solid var(--border-default);
+  border-radius: 22px;
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+  margin-bottom: 7px;
+}
+.homes-empty h3 {
+  font:
+    400 32px/1.25 Georgia,
+    serif;
+  margin: 0;
+  letter-spacing: -0.6px;
+}
+.homes-empty p {
+  max-width: 460px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+.homes-empty > button {
+  margin-top: 6px;
+}
+.homes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.home-listing-card {
+  text-align: left;
+  background: var(--surface-raised);
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: 15px;
+  overflow: hidden;
+  color: var(--text-primary);
+}
+.home-listing-card:hover {
+  border-color: var(--text-tertiary);
+}
+.home-listing-photo {
+  aspect-ratio: 1.4;
+  position: relative;
+  background: var(--surface-overlay);
+  overflow: hidden;
+}
+.home-listing-photo > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.home-no-photo {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text-secondary);
+}
+.home-no-photo > span {
+  font-size: 10px;
+}
+.home-purpose,
+.home-status {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: #f5f3ed;
+  color: #202022;
+  font-size: 10px;
+}
+.home-status {
+  left: auto;
+  right: 12px;
+  background: #202022;
+  color: #f5f3ed;
+}
+.home-listing-copy {
+  padding: 17px;
+}
+.home-listing-copy > span {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.home-listing-copy h3 {
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+  margin: 8px 0 14px;
+  line-height: 1.4;
+}
+.home-facts {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+  font-size: 10px;
+  margin-bottom: 20px;
+}
+.home-facts span + span:before {
+  content: "·";
+  margin-right: 7px;
+}
+.home-price {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid var(--border-default);
+  padding-top: 15px;
+}
+.home-price b {
+  font-size: 19px;
+  font-weight: 550;
+}
+.home-price small {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+.homes-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-top: 1px solid var(--border-default);
+  padding: 18px 0;
+  color: var(--text-secondary);
+}
+.homes-privacy svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.homes-privacy p {
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 0;
+  max-width: 780px;
+}
+.homes-dialog {
+  width: 690px;
+  max-width: calc(100vw - 28px);
+  max-height: 88dvh;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  padding: 25px;
+  color: var(--text-primary);
+}
+.homes-dialog::backdrop {
+  background: #0009;
+  backdrop-filter: blur(7px);
+}
+.homes-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.homes-dialog > header h2 {
+  font-size: 22px;
+  letter-spacing: -0.6px;
+  margin: 0;
+  font-weight: 550;
+  line-height: 1.4;
+}
+.homes-dialog > header > button {
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 0;
+  min-width: 40px;
+  min-height: 40px;
+}
+.homes-form {
+  display: grid;
+  gap: 18px;
+}
+.homes-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.homes-dialog input,
+.homes-dialog select,
+.homes-dialog textarea {
+  width: 100%;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 13px;
+  min-width: 0;
+}
+.homes-dialog textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.homes-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+.homes-form-choice {
+  display: flex;
+  gap: 8px;
+}
+.homes-form-choice button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 20px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  color: var(--text-secondary);
+  min-height: 44px;
+}
+.homes-form-choice button[aria-pressed="true"] {
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+.homes-dialog .homes-consent {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  line-height: 1.7;
+  gap: 10px;
+}
+.homes-consent input {
+  width: 17px;
+  height: 17px;
+  min-height: 17px;
+  flex-shrink: 0;
+  margin: 3px 0;
+}
+.homes-photo-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+.homes-photo-strip button {
+  position: relative;
+  border: 0;
+  padding: 0;
+  flex-shrink: 0;
+  background: none;
+}
+.homes-photo-strip img {
+  width: 90px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.homes-photo-strip svg {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  background: #202022;
+  color: white;
+  border-radius: 50%;
+}
+.home-detail {
+  display: grid;
+  gap: 20px;
+}
+.home-detail-photos {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+}
+.home-detail-photos img {
+  width: 100%;
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.home-detail-heading {
+  display: grid;
+  gap: 10px;
+}
+.home-detail-heading > span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.home-detail-heading strong {
+  font-size: 29px;
+  font-weight: 550;
+  letter-spacing: -0.7px;
+}
+.home-detail-heading small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.home-detail-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.home-detail-facts span {
+  padding: 8px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.home-description {
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0;
+}
+.homes-owner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.home-detail h3 {
+  font-size: 16px;
+  font-weight: 550;
+  margin: 8px 0 0;
+}
+.home-interest {
+  display: grid;
+  gap: 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 12px;
+}
+.home-interest > span {
+  color: var(--text-secondary);
+}
+.home-interest > div {
+  display: flex;
+  gap: 8px;
+}
+.home-interest a {
+  color: var(--text-primary);
+  text-underline-offset: 4px;
+}
+.homes-contact {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid var(--border-default);
+  padding-top: 10px;
+}
+.homes-contact > button {
+  width: max-content;
+}
+@media (max-width: 1100px) {
+  .homes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .marketplace-heading h1 {
+    font-size: 29px;
+  }
+  .marketplace-heading > span {
+    font-size: 9px;
+    max-width: 105px;
+    line-height: 1.5;
+  }
+  .marketplace-mode {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .marketplace-mode button {
+    flex: 1;
+  }
+  .marketplace-shell .cm-banner h1 {
+    font-size: 24px !important;
+  }
+  .homes-intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .homes-intro h2 {
+    font-size: 24px;
+  }
+  .homes-intro p {
+    font-size: 12px;
+  }
+  .homes-tools {
+    gap: 0;
+  }
+  .homes-intents button {
+    padding: 10px 11px;
+    font-size: 11px;
+  }
+  .homes-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .homes-filters > input {
+    grid-column: 1/-1;
+  }
+  .homes-grid {
+    grid-template-columns: 1fr;
+  }
+  .homes-empty {
+    padding: 32px 20px;
+  }
+  .homes-empty h3 {
+    font-size: 27px;
+  }
+  .homes-empty p {
+    font-size: 12px;
+  }
+  .homes-dialog {
+    padding: 20px;
+  }
+  .homes-dialog > header h2 {
+    font-size: 20px;
+  }
+  .homes-form-grid {
+    gap: 12px;
+  }
+  .home-detail-heading strong {
+    font-size: 26px;
+  }
+}
