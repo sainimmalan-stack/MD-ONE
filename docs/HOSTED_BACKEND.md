@@ -12,9 +12,9 @@ Production uses `MDP_MODE=production` and `NEXT_PUBLIC_HOSTED_AUTH=true`.
 - Cancellation restores stock once. Warehouse status transitions enforce picking, packing, dispatch and delivery in order. Delivery completion explicitly confirms cash collection.
 - Warehouse controls receive supplier stock, set selling prices and open delivery slots. Platform controls manage project coverage and review residence requests with the applicant identity.
 - No live supplier stock, delivery capacity, resident membership, or staff role is invented. Operators must enter actual operating details.
-- Ten schema migrations have been applied. SQL transaction tests use temporary fixtures and roll back all data.
+- Twelve schema migrations have been applied. SQL transaction tests use temporary fixtures and roll back all data.
 
-The hosted Daily page reuses the existing premium GroceryStorefront component, original photographic categories, desktop sidebar, mobile identity header and bottom navigation. It displays only connected grocery/account destinations.
+The hosted Daily page reuses the existing premium GroceryStorefront component, original photographic categories, desktop sidebar, mobile identity header and bottom navigation. It now also links to the original premium Community, Carpool and Marketplace components.
 
 ## Validation
 
@@ -24,7 +24,7 @@ The owner account was created by the user and the explicitly approved platform r
 
 ## Remaining modules
 
-Community, carpool, marketplace/homes, project committee finance, service dispatch, document storage/scan, personal finance and native hosted integration still require production request handlers and end-to-end checks. Existing local demo screens remain in the repository; they do not run as the hosted backend. Unmigrated production API routes fail closed.
+Project committee finance, service dispatch, document storage/scan, personal finance and native hosted integration still require production request handlers and end-to-end checks. Hosted cultural-event management, push notifications, moderation dashboard and route/geospatial matching are separate follow-up work. Existing local demo screens remain in the repository; they do not run as the hosted backend. Unmigrated production API routes fail closed.
 
 Email delivery was not verified. The app now supports password sign-in for provisioned accounts so ordinary sign-in does not depend on SMTP. The sender previously inferred from the builder website is not the user's email and must not be used as the MD One sender. Password recovery and invitation emails require a separately approved sender configuration.
 
@@ -38,3 +38,18 @@ Email delivery was not verified. The app now supports password sign-in for provi
 - SQL isolation/regression tests passed, including test/live mixing rejection, operator-only test visibility and test delivery without an approved real residence.
 
 The retained test order is visible to operators in Order desk. Test records are labelled and segregated; they must be excluded from real sales and fulfilment reporting.
+
+## Hosted community, carpool and marketplace
+
+Migrations 011–012 connect the original premium web components through authenticated `community_api` SQL projections/actions. User JWTs authorize every request; no service role key is used. Real active residence gates social posting, friends, carpool and item trading. Platform ownership confers no invented residential identity. A non-resident verified property owner can list their registered home. Founder accounts can preview the premium screens without fabricating a flat.
+
+- Community: editable name, profile privacy, occupation, contact visibility, text/photo posts, likes/comments, discovery, incoming/outgoing friend requests, blocks and private reports. Locked profiles hide their details, photos, flat and posts until accepted. Contact visibility remains separate.
+- Carpool: area/date search, offers, pending/accepted connections, atomic seat allocation, rejection, cancellation, withdrawal and optional phone sharing after mutual acceptance. No ride chat, fares, payment processing, dispatch, route matching or live tracking.
+- Items: drafts/publishing/editing/status, filters, explicit project or network audience, photo listings, saved items, private enquiries/messages and reporting. No grocery inventory or delivery coupling.
+- Homes: verified-ownership rent/sale listings, photo galleries, filtering, own listings, interest acceptance/decline/withdrawal, optional phone consent/revocation, 30-day expiry/renewal and rented/sold/withdrawn status. Exact flat numbers remain private.
+- Images: bounded JPEG/PNG uploads in a private database table for this small pilot, served through a no-cache, JWT-authorized image proxy. Raw media/contact tables have no client privileges. There are no permanent public image URLs. Object-storage migration/thumbnail processing is future scaling work. No government IDs belong in social/listing media.
+- Data refresh: community refreshes every 30 seconds, manual refresh is available, private item messages refresh every 6 seconds while open. These are polling, not a claimed WebSocket/notification service.
+
+`supabase/tests/community_flows.sql` passed against hosted PostgreSQL with rollback-only simulated identities: locked profile/media authorization, accepted friendship, feed interactions, seat replay and overbooking rejection, optional phone disclosure and withdrawal, listing/message deduplication, private enquiry isolation, home ownership, hidden home flat IDs, home phone consent/revocation and blocked/unverified access. No synthetic resident/community records are retained. Production TypeScript and build pass. Resident browser journeys cannot be claimed against the founder's account without a real verified residence; database multi-actor tests cover those contracts.
+
+Reports persist in the private social/exchange/community report tables for review through the Supabase administration environment. The founder's existing account remains platform owner without an active real residence. The earlier expired grocery-test membership does not unlock community.
