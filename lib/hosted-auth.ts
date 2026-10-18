@@ -74,7 +74,7 @@ export async function hostedAuth(req:NextRequest, path:string[]) {
     if(route==='grocery'&&req.method==='GET') {
       const [context,products,slots,orders,reviews]=await Promise.all([
         rpc('grocery_context'),rpc('grocery_catalog'),rpc('grocery_slots'),
-        call('/rest/v1/orders?select=*,order_items(*)&order=created_at.desc&limit=100',{},token),rpc('residence_review_queue')
+        call('/rest/v1/orders?select=*,order_items(*),order_events(*)&order=created_at.desc&limit=100',{},token),rpc('residence_review_queue')
       ]);
       return respond({...context,products,slots,orders,reviews});
     }
