@@ -1,0 +1,1 @@
+export const appearanceInit = `(function(){try{var p=localStorage.getItem('md-one-appearance');var t=p==='light'||p==='dark'?p:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}})();`;
