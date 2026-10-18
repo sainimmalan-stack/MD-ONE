@@ -11,6 +11,8 @@ import {
 import {
   validateShowcaseInput,
   SAMPLE_DOCUMENT,
+  canReviewStaffDemo,
+  SHOWCASE_STAFF_PERSONAS,
 } from "../lib/showcase-policy.ts";
 test("production local DB remains fail closed; explicitly synthetic sessions are private and resettable", () => {
   const before = process.env.MDP_MODE;
@@ -91,4 +93,18 @@ test("hosted demo accepts its safe sample and rejects real files/photos", () => 
       validateShowcaseInput(["my-project", "p1", "attachments"], "POST", {}),
     /disabled/,
   );
+});
+
+test("staff previews are restricted to the current verified founder platform owner",()=>{
+ const founder="00000000-0000-4000-8000-000000000001";
+ assert.equal(canReviewStaffDemo(null,founder),false);
+ assert.equal(canReviewStaffDemo({owner:true,user:{id:"another-account"}},founder),false);
+ assert.equal(canReviewStaffDemo({owner:false,user:{id:founder}},founder),false);
+ assert.equal(canReviewStaffDemo({owner:"true",user:{id:founder}},founder),false);
+ assert.equal(canReviewStaffDemo({owner:true,user:{email:"owner@example.invalid"}},founder),false);
+ assert.equal(canReviewStaffDemo({owner:true,user:{id:founder}},founder),true);
+ assert.equal(canReviewStaffDemo({owner:true,user:{id:founder}},undefined),false);
+ assert.equal(canReviewStaffDemo({owner:true,user:{id:founder}},"invalid"),false);
+ assert.equal(SHOWCASE_STAFF_PERSONAS.size,9);
+ assert.equal(SHOWCASE_STAFF_PERSONAS.has("resident"),false);
 });
