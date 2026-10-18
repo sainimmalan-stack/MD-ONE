@@ -1,4 +1,5 @@
 "use client";
+import {appFetch, appApiUrl} from "@/lib/app-fetch";
 import { formOptions, optionValue } from "@/lib/form-options";
 import { HomesMarketplace } from "./homes-marketplace";
 import { useEffect, useState, useRef, type ReactNode } from "react";
@@ -34,7 +35,7 @@ const today = () =>
 const month = () => today().slice(0, 7);
 const key = () => crypto.randomUUID();
 async function api(path: string, body?: unknown) {
-  const r = await fetch(`/api/${path}`, {
+  const r = await appFetch(`/api/${path}`, {
     method: body ? "POST" : "GET",
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
@@ -1690,7 +1691,7 @@ export function MyProject({ data }: { data: R }) {
                   <strong>{money(s.amount)}</strong>
                   {s.attachment_id && (
                     <a
-                      href={`/api/my-project/${pid}/attachments/${s.attachment_id}`}
+                      href={appApiUrl(`my-project/${pid}/attachments/${s.attachment_id}`)}
                     >
                       Your proof
                     </a>
@@ -2193,7 +2194,7 @@ export function MyProject({ data }: { data: R }) {
                   {committee && b.attachment_id && (
                     <a
                       className="cm-link-button"
-                      href={`/api/my-project/${pid}/attachments/${b.attachment_id}`}
+                      href={appApiUrl(`my-project/${pid}/attachments/${b.attachment_id}`)}
                     >
                       <FileText size={16} /> Private original
                     </a>
@@ -2201,7 +2202,7 @@ export function MyProject({ data }: { data: R }) {
                   {b.redacted_attachment_id && (
                     <a
                       className="cm-link-button"
-                      href={`/api/my-project/${pid}/attachments/${b.redacted_attachment_id}`}
+                      href={appApiUrl(`my-project/${pid}/attachments/${b.redacted_attachment_id}`)}
                     >
                       Resident-safe bill copy
                     </a>
@@ -2721,7 +2722,7 @@ export function MyProject({ data }: { data: R }) {
                       <strong>{money(s.amount)}</strong>
                       {s.attachment_id && (
                         <a
-                          href={`/api/my-project/${pid}/attachments/${s.attachment_id}`}
+                          href={appApiUrl(`my-project/${pid}/attachments/${s.attachment_id}`)}
                         >
                           Private proof
                         </a>
@@ -2924,7 +2925,7 @@ export function MyProject({ data }: { data: R }) {
           <p className="cm-preserve">{question.body}</p>
           {question.attachment_id && (
             <a
-              href={`/api/my-project/${pid}/attachments/${question.attachment_id}`}
+              href={appApiUrl(`my-project/${pid}/attachments/${question.attachment_id}`)}
             >
               Supporting attachment
             </a>

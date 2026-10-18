@@ -1,4 +1,5 @@
 "use client";
+import {appFetch, appApiUrl} from "@/lib/app-fetch";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   Building2,
@@ -19,7 +20,7 @@ const money = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n / 100);
 async function api(path: string, body?: R) {
-  const r = await fetch("/api/" + path, {
+  const r = await appFetch("/api/" + path, {
     method: body ? "POST" : "GET",
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,

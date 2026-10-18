@@ -1,4 +1,5 @@
 "use client";
+import {appFetch, appApiUrl} from "@/lib/app-fetch";
 import { CommunityHighlights } from "./community-highlights";
 import { useState, useEffect, type ReactNode, type FormEvent } from "react";
 import {
@@ -58,7 +59,7 @@ type Props = {
   openProfile?: (id: string) => void;
 };
 const request = async (path: string, method = "GET", body?: unknown) => {
-  const r = await fetch("/api/" + path, {
+  const r = await appFetch("/api/" + path, {
     method,
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,

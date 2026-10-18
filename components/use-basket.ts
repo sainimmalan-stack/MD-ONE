@@ -1,4 +1,5 @@
 "use client";
+import {appFetch, appApiUrl} from "@/lib/app-fetch";
 import { useEffect, useState } from "react";
 import {
   readBasket,
@@ -67,7 +68,7 @@ export function useBasket(scope: string | null) {
         lock,
         details,
         async (body) => {
-          const response = await fetch("/api/orders", {
+          const response = await appFetch("/api/orders", {
             method: "POST",
             signal: AbortSignal.timeout(15000),
             headers: { "Content-Type": "application/json" },
