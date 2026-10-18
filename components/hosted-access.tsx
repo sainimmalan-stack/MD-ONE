@@ -17,6 +17,7 @@ async function request(path: string, body?: unknown) {
 }
 export function HostedAccess() {
   const [account, setAccount] = useState(false),
+    [forgot, setForgot] = useState(false),
     [password, setPassword] = useState(""),
     [session, setSession] = useState<any>(null),
     [ready, setReady] = useState(false),
@@ -37,7 +38,9 @@ export function HostedAccess() {
   };
   useEffect(() => {
     load()
-      .catch(() => {})
+      .catch((e: Error) => {
+        if (e.message.includes("preview")) setError(e.message);
+      })
       .finally(() => setReady(true));
   }, []);
   const act = async (fn: () => Promise<void>) => {
@@ -78,18 +81,30 @@ export function HostedAccess() {
               EXCLUSIVELY FOR MY DREAM PROJECTS
             </span>
             <h1>
-              Your people.
-              <br />
-              Your everyday.
+              {forgot ? (
+                "Forgot your password?"
+              ) : (
+                <>
+                  Your people.
+                  <br />
+                  Your everyday.
+                </>
+              )}
             </h1>
             <p>
-              Sign in to your MD One account. Your residence is verified
-              separately.
+              {forgot
+                ? "Enter your account email. We’ll send a link to set a new password. Open it in this same browser."
+                : "Sign in to your MD One account. Your residence is verified separately."}
             </p>
             <form
               onSubmit={(e: FormEvent) => {
                 e.preventDefault();
                 void act(async () => {
+                  if (forgot) {
+                    await request("recovery", { email });
+                    setSent(true);
+                    return;
+                  }
                   await request("password", { email, password });
                   setPassword("");
                   await load();
@@ -108,31 +123,53 @@ export function HostedAccess() {
                   required
                 />
               </label>
-              <label>
-                Password
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </label>
-              <button className="hosted-primary" disabled={busy}>
-                {busy ? "Signing in…" : "Sign in"}
-              </button>
-              {sent && (
-                <button
-                  type="button"
-                  className="hosted-link"
-                  onClick={() => {
-                    setSent(false);
-                    setToken("");
-                  }}
-                >
-                  Use another email
-                </button>
+              {!forgot && (
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    disabled={busy}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </label>
               )}
+              <button
+                className="hosted-primary"
+                disabled={busy || (forgot && sent)}
+              >
+                {forgot
+                  ? busy
+                    ? "Sending…"
+                    : sent
+                      ? "Check your inbox"
+                      : "Send reset link"
+                  : busy
+                    ? "Signing in…"
+                    : "Sign in"}
+              </button>
+              {forgot && sent && (
+                <p role="status" className="hosted-notice">
+                  If an account exists for this email, a reset link will arrive
+                  shortly. Check spam too. You can request another link after a
+                  minute.
+                </p>
+              )}
+              <button
+                type="button"
+                className="hosted-link"
+                disabled={busy}
+                onClick={() => {
+                  setForgot(!forgot);
+                  setSent(false);
+                  setPassword("");
+                  setError("");
+                }}
+              >
+                {forgot ? "Back to sign in" : "Forgot password?"}
+              </button>
             </form>
             <small>
               New resident? Contact your MD One administrator to set up your
@@ -270,6 +307,13 @@ export function HostedAccess() {
         {error && (
           <div className="hosted-error" role="alert">
             {error}
+            {error.includes("preview") && (
+              <p>
+                <a href="https://emd1.vercel.app/">
+                  Open the live MD One app ↗
+                </a>
+              </p>
+            )}
           </div>
         )}
       </main>
