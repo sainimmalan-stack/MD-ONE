@@ -3,6 +3,7 @@ import { appFetch, appApiUrl } from "@/lib/app-fetch";
 import { GroceryStorefront, ProductArt } from "@/components/grocery-storefront";
 import { useBasket } from "@/components/use-basket";
 import { basketKey } from "@/lib/basket";
+import { DemoRoleSwitcher, DemoIdentitySummary } from "./demo-role-switcher";
 import { LivingHome } from "./living-home";
 import { BrandLockup } from "@/components/brand-lockup";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -94,24 +95,6 @@ const day = (s: string) =>
   });
 const cx = (...c: (string | false | undefined)[]) =>
   c.filter(Boolean).join(" ");
-const personas = [
-  ["resident", "Ananya · Resident"],
-  ["neighbor", "Kiran · Neighbour"],
-  ["owner", "Non-resident owner"],
-  ["pending", "Pending resident"],
-  ["admin", "Association manager"],
-  ["warehouse", "Warehouse team"],
-  ["rider1", "Arjun · Delivery"],
-  ["rider2", "Meera · Delivery"],
-  ["sky-resident", "Rhea · Skylark 101"],
-  ["sky-neighbor", "Aditya · Skylark 102"],
-  ["sky-family", "Neha · Skylark 103"],
-  ["service", "MDP Service Desk"],
-  ["tech1", "Ravi · Plumbing"],
-  ["tech2", "Imran · Electrical"],
-  ["tech3", "Suresh · Tiles"],
-  ["platform", "Platform operations"],
-];
 const nav = [
  ["home", "Home", Home, "హోమ్"],
  ["orders", "Orders", ShoppingBasket, "ఆర్డర్లు"],
@@ -519,34 +502,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
         </div>
       </aside>
       <div className="main-shell">
-        <div className="demo-strip">
-          <span>
-            <span className="tiny-dot" />{" "}
-            {showcase ? "DEMO PREVIEW" : "LOCAL DEMO"}{" "}
-            <span className="demo-detail">
-              · Synthetic residents, orders & service zones
-            </span>
-          </span>
-          <label>
-            Explore as{" "}
-            <select
-              aria-label="Demo persona"
-              disabled={busy}
-              value={actor}
-              onChange={(e) => switchPersona(e.target.value)}
-            >
-              {personas.map(([v, l]) => (
-                <option value={v} key={v}>
-                  {showcase && v === "resident"
-                    ? "Ananya · Tenant / Vice President"
-                    : showcase && v === "neighbor"
-                      ? "Kiran · Owner / President"
-                      : l}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        {showcase && <div className="demo-strip"><DemoRoleSwitcher actor={actor} busy={busy} onChange={switchPersona}/></div>}
         <header className="topbar">
           <div className="location">
             <a
@@ -661,7 +617,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
                   <ShieldCheck />
                   <h2>Your community is one approval away.</h2>
                   <p>
-                    Your membership is pending. Your association or flat owner
+                    Your membership is pending. Your project support team or flat owner
                     can verify you. Government IDs are optional.
                   </p>
                   <Button onClick={() => go("profile")}>View membership</Button>
@@ -724,6 +680,7 @@ export function DemoApp({ showcase = false }: { showcase?: boolean } = {}) {
                   {tab === "services" && data.social && (
                     <InstaServices data={data} act={act} busy={busy} />
                   )}
+                  {showcase && tab === "profile" && <DemoIdentitySummary actor={actor}/>}
                   {["profile", "resident-profile"].includes(tab) &&
                     data.social && (
                       <ResidentProfile
@@ -2306,7 +2263,7 @@ function Profile({ data, act, switchPersona, busy }: any) {
             <span className="avatar big">{data.user.name[0]}</span>
             <div>
               <h2>{data.user.name}</h2>
-              <p>Demo persona · {data.user.role}</p>
+              <p>Demo access · {({association:"Project support",warehouse:"Warehouse",delivery:"Delivery partner",services:"Service coordinator",technician:"Technician",platform:"Platform administrator",resident:"Resident"} as R)[data.user.role] || "Member"}</p>
             </div>
           </div>
           <h3>Your MDP memberships</h3>
@@ -2525,7 +2482,7 @@ function WarehouseOperations({ data, act, busy }: any) {
             {isRider
               ? "Your delivery day"
               : isAssociation
-                ? "Community desk"
+                ? "Project support desk"
                 : "The neighbourhood warehouse"}
             <span className="gold-dot">.</span>
           </h1>
@@ -2533,7 +2490,7 @@ function WarehouseOperations({ data, act, busy }: any) {
             {isRider
               ? "Only your assigned orders appear here."
               : isAssociation
-                ? "Scoped resident verification, support, and moderation."
+                ? "Resident verification, complaints and moderation for your project. Committee accounts are managed separately."
                 : "One warehouse. Two electric bikes. A little everyday coordination."}
           </p>
         </div>
