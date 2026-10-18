@@ -860,8 +860,7 @@ export function SocialCircle({
             <>
               <button
                 className="exp-compose-trigger"
-                disabled={data.hosted && !data.eligible}
-                onClick={() => setComposer(true)}
+                disabled={data.hosted && !data.eligible} onClick={() => setComposer(true)}
               >
                 <Avatar p={s.profile} />
                 <span>What’s happening in your little world?</span>
@@ -1414,7 +1413,7 @@ export function ResidentProfile({
                 {own ? (
                   <button
                     className="exp-primary"
-                    onClick={() => setComposer(true)}
+                    disabled={data.hosted && !data.eligible} onClick={() => setComposer(true)}
                   >
                     <Plus size={16} />
                     Share a moment

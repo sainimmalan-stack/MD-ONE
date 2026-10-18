@@ -1,6 +1,6 @@
 "use client";
 import {useCallback,useEffect,useState} from 'react';
-import {ArrowLeft,ArrowRight,RefreshCw,ShieldCheck} from 'lucide-react';
+import {ArrowLeft,ArrowRight,RefreshCw,ShieldCheck,UserRound} from 'lucide-react';
 import {SocialCircle,ResidentProfile} from './experience';
 import {Carpool} from './carpool';
 import {Exchange} from './community-management';
@@ -16,7 +16,8 @@ export function HostedCommunity({tab,onNavigate,onAccount}:{tab:string;onNavigat
  <nav className="section-navigation" aria-label="Community sections">{[['community','Neighbours'],['exchange','Buy & sell'],['carpool','Carpool']].map(([id,label])=><button key={id} aria-current={tab===id?'page':undefined} onClick={()=>onNavigate(id)}>{label}</button>)}<button className="md-live-refresh" disabled={busy} onClick={()=>void act(load,'Updated')} aria-label="Refresh community"><RefreshCw size={16}/></button></nav>
  {error&&<p className="md-store-message" role="alert">{error}<button onClick={()=>void act(load,'Updated')}>Try again</button></p>}{notice&&<p className="md-store-message" role="status">{notice}</p>}
  {!data?<div className="md-store-empty" role="status">Opening your community…</div>:<>
- {!data.eligible&&<div className="md-store-message"><ShieldCheck size={20}/><div><strong>{data.owner?'Your platform owner account':'Your private community'}</strong><p>{data.owner?'Your administration access is ready. Resident posting, ride connections and item listings require a verified real residence. Homes can be listed once ownership is verified.':'Verify your residence to meet neighbours, share journeys and use the private marketplace.'}</p></div><button onClick={onAccount}>My residence <ArrowRight size={15}/></button></div>}
+ {!data.eligible&&(data.owner?<details className="md-owner-notice"><summary><ShieldCheck size={16}/><strong>Platform owner</strong><span>About resident access</span></summary><p>Your administration access is ready. Resident posting, ride connections and item listings require a verified real residence. Homes require verified ownership.</p><button className="text-link" onClick={onAccount}>Account & residence <ArrowRight size={15}/></button></details>:<div className="md-store-message"><ShieldCheck size={20}/><div><strong>Your private community</strong><p>Verify your residence to meet neighbours, share journeys and use the private marketplace.</p></div><button onClick={onAccount}>My residence <ArrowRight size={15}/></button></div>)}
+ {tab==='community'&&!profile&&<div className="md-community-tools"><button className="exp-text-button" onClick={()=>setProfile(data.user.id)}><UserRound size={16}/>My profile & privacy <ArrowRight size={14}/></button></div>}
  {profile?<><button className="text-link" onClick={()=>setProfile(undefined)}><ArrowLeft size={16}/>Back to {tab==='community'?'community':tab==='exchange'?'marketplace':'carpool'}</button><ResidentProfile data={data} uid={profile} busy={busy} act={act} openProfile={setProfile} go={go}/></>:tab==='community'?<SocialCircle data={data} busy={busy} act={act} openProfile={setProfile} go={go}/>:tab==='carpool'?<Carpool data={data} busy={busy} act={act} api={api}/>:<Exchange data={data} openProfile={setProfile}/>}
  </>}
  </section>;

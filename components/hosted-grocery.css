@@ -12,3 +12,8 @@
 
 .md-hosted-community>.md-store-message{display:flex;align-items:center;gap:16px;padding:16px 20px}.md-hosted-community>.md-store-message>div{flex:1}.md-hosted-community>.md-store-message>svg{flex-shrink:0}.md-hosted-community>.md-store-message>button{flex-shrink:0}
 @media(max-width:760px){.md-hosted-community>.md-store-message{padding:14px;gap:10px}.md-hosted-community>.md-store-message>div{min-width:220px}.md-hosted-community>.md-store-message>button{margin-left:30px}}
+
+.md-owner-notice{margin:0 0 30px;padding:12px 16px;border:1px solid var(--border-default);border-radius:12px;font-size:12px;color:var(--text-secondary)}.md-owner-notice summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}.md-owner-notice summary::-webkit-details-marker{display:none}.md-owner-notice strong{color:var(--text-primary);font-weight:500}.md-owner-notice summary span{margin-left:auto;font-size:11px}.md-owner-notice p{line-height:1.7;margin:14px 0}.md-owner-notice button{font:inherit}
+@media(max-width:760px){.md-hosted-community>.section-navigation{display:none}.md-owner-notice{margin-bottom:24px}.md-owner-notice summary span{font-size:10px}}
+
+.md-community-tools{display:flex;justify-content:flex-end;margin:-12px 0 20px}.md-community-tools button{min-height:44px}
