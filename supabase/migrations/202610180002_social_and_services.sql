@@ -70,4 +70,5 @@ grant execute on function public.resident_profile(uuid) to authenticated;
 -- Friendship request/decision/block RPCs, dispatch RPCs, moderation, signed social
 -- image reads and owner profile joins still require production adapter implementation.
 insert into public.service_catalog values('plumbing','Plumbing','Leaks, fittings and water lines'),('electrical','Electrical','Switches, wiring and lights'),('tiles','Tiles & stone','Repairs, retiling and finishing'),('painting','Painting','Interior and exterior painting'),('carpentry','Carpentry','Doors, cabinets and repairs'),('cleaning','Deep cleaning','A reset for your space'),('waterproofing','Waterproofing','Damp walls, seepage and sealing'),('ac','AC care','Servicing, installation and repairs');
+alter table private.social_reports enable row level security;
 commit;

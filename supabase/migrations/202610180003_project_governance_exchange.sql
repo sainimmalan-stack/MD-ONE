@@ -73,4 +73,5 @@ grant execute on function private.project_member(uuid,uuid),private.project_rela
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('project-bills','project-bills',false,2000000,array['application/pdf','image/jpeg','image/png']),('resident-exchange','resident-exchange',false,400000,array['image/jpeg','image/png']) on conflict(id) do nothing;
 -- No direct storage policies. Signed operations must check project/participant scope and scan_state.
 -- Numeric register conversion is deliberately NOT inferred from totals: authorized import + collision report required.
+alter table private.exchange_reports enable row level security;
 commit;
