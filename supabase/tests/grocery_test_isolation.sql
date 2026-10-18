@@ -6,7 +6,8 @@ do $$
 declare f uuid; p uuid; s uuid; o uuid; rejected boolean; live_product uuid;
 begin
  insert into public.flats(project_id,label,is_test) select id,'99997',true from public.projects limit 1 returning id into f;
- insert into public.memberships(user_id,flat_id,kind,status) values(auth.uid(),f,'household','approved');
+ -- Test checkout must work through operator permissions without a real residence.
+ if private.active_resident(auth.uid()) then raise exception 'Test operator gained real resident access';end if;
  insert into public.products(name,category,unit,price_paise,is_test,price_status) values('TEST ISOLATION','Dairy & eggs','1 pack',9900,true,'pilot') returning id into p;
  insert into public.inventory_batches(product_id,supplier,quantity,cost_paise,expires_at) values(p,'TEST ONLY',2,0,now()+interval '30 days');
  insert into public.delivery_slots(starts_at,ends_at,capacity,is_test) values(now()+interval '1 day',now()+interval '1 day 1 hour',2,true) returning id into s;
