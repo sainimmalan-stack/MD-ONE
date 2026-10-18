@@ -30,13 +30,19 @@ function setSession(response:NextResponse, session:any) {
 export async function hostedAuth(req:NextRequest, path:string[]) {
   try {
     const route=path.join('/');
-    if(req.method!=='GET') sameOrigin(req);
+    if(req.method!=='GET') { sameOrigin(req); if(Number(req.headers.get('content-length')||0)>64000) return json({error:'Request too large.'},413); }
     if(route==='auth/callback' && req.method==='GET') {
       const code=req.nextUrl.searchParams.get('code');
       const verifier=req.cookies.get('md_one_verifier')?.value;
       if(!code || code.length>2048 || !verifier) return NextResponse.redirect(new URL('/?auth_error=expired',req.url));
       const session=await call('/auth/v1/token?grant_type=pkce',{method:'POST',body:JSON.stringify({auth_code:code,code_verifier:verifier})});
       const response=NextResponse.redirect(new URL('/',req.url));setSession(response,session);response.cookies.delete('md_one_verifier');return response;
+    }
+    if(route==='auth/password' && req.method==='POST') {
+      const b=await req.json();
+      if(typeof b.email!=='string'||b.email.length>254||typeof b.password!=='string'||b.password.length>200) return json({error:'Enter your email and password.'},400);
+      const session=await call('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:b.email.trim().toLowerCase(),password:b.password})});
+      const response=json({ok:true});setSession(response,session);return response;
     }
     if(route==='auth/otp' && req.method==='POST') {
       const b=await req.json();
@@ -64,6 +70,34 @@ export async function hostedAuth(req:NextRequest, path:string[]) {
       user=await call('/auth/v1/user',{},token);
     }
     const respond=(value:unknown,status=200)=>{const response=json(value,status);if(refreshed)setSession(response,refreshed);return response;};
+    const rpc=(name:string,body:unknown={})=>call('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(body)},token);
+    if(route==='grocery'&&req.method==='GET') {
+      const [context,products,slots,orders,reviews]=await Promise.all([
+        rpc('grocery_context'),rpc('grocery_catalog'),rpc('grocery_slots'),
+        call('/rest/v1/orders?select=*,order_items(*)&order=created_at.desc&limit=100',{},token),rpc('residence_review_queue')
+      ]);
+      return respond({...context,products,slots,orders,reviews});
+    }
+    if(route==='orders'&&req.method==='POST') {
+      const b=await req.json();
+      try {return respond(await rpc('grocery_checkout',{p_flat:b.flatId,p_slot:b.slot,p_items:b.items,p_key:b.key}));}
+      catch(e:any) {if(e.status===400) return respond({error:e.message},422);throw e;}
+    }
+    if(route==='grocery/status'&&req.method==='POST') {
+      const b=await req.json();await rpc('grocery_order_status',{p_order:b.id,p_status:b.status});return respond({ok:true});
+    }
+    if(route==='grocery/receive'&&req.method==='POST') {
+      const b=await req.json();await rpc('grocery_receive',{p_name:b.name,p_category:b.category,p_unit:b.unit,p_price:b.price,p_cost:b.cost,p_quantity:b.quantity,p_expiry:b.expiry,p_supplier:b.supplier,p_key:b.key,p_product:b.product||null});return respond({ok:true});
+    }
+    if(route==='grocery/slot'&&req.method==='POST') {
+      const b=await req.json();await rpc('grocery_open_slot',{p_start:b.start,p_end:b.end,p_capacity:b.capacity});return respond({ok:true});
+    }
+    if(route==='grocery/coverage'&&req.method==='POST') {
+      const b=await req.json();await rpc('grocery_enable_project',{p_project:b.projectId,p_enabled:b.enabled});return respond({ok:true});
+    }
+    if(route==='auth/review'&&req.method==='POST') {
+      const b=await req.json();await rpc('review_residence',{p_request:b.id,p_approve:b.approve});return respond({ok:true});
+    }
     if(route==='auth/logout'&&req.method==='POST') {
       await call('/auth/v1/logout',{method:'POST'},token);
       const response=json({ok:true});response.cookies.delete(accessCookie);response.cookies.delete(refreshCookie);return response;
