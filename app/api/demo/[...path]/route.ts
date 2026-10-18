@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { demoApi } from "@/lib/demo-api";
 import { ShowcaseSessions } from "@/lib/showcase-session";
 import { withSyntheticVault } from "@/lib/db";
+import { showcaseOwnerAccess } from "@/lib/showcase-owner";
 import { Service } from "@/lib/service";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,7 +20,15 @@ async function handle(
   ctx: { params: Promise<{ path: string[] }> },
 ) {
   const path = (await ctx.params).path;
+  let access: ReturnType<typeof showcaseOwnerAccess> | undefined;
+  const ownerAccess = () => access ??= showcaseOwnerAccess(req);
+  const finish = async(response: NextResponse) => {
+    if(access) for(const cookie of (await access).cookies) response.cookies.set(cookie);
+    return response;
+  };
   try {
+    if(path[0] === "demo-access" && path.length === 1 && req.method === "GET")
+      return finish(NextResponse.json({staffAllowed:(await ownerAccess()).allowed},{headers}));
     if (!["GET", "POST", "PATCH", "DELETE"].includes(req.method))
       return NextResponse.json(
         { error: "Method not allowed." },
@@ -77,6 +86,7 @@ async function handle(
         cookiePath,
         showcase: true,
         runId: s.runId,
+        authorizeShowcaseStaff: async() => (await ownerAccess()).allowed,
       }),
     );
     for (const [k, v] of Object.entries(headers)) response.headers.set(k, v);
@@ -88,7 +98,7 @@ async function handle(
         sameSite: "strict",
         secure: req.nextUrl.protocol === "https:",
       });
-    return response;
+    return finish(response);
   } catch {
     return NextResponse.json(
       { error: "The temporary demo is busy. Please wait or use Reset demo." },
