@@ -1,3 +1,4 @@
+import {AsyncLocalStorage} from "node:async_hooks";
 import { migrateHomes } from "./homes-db.ts";
 import { DatabaseSync } from "node:sqlite";
 import { migrateRetail } from "./retail.ts";
@@ -47,7 +48,9 @@ export function openDatabase(
     );
   if (path !== ":memory:")
     mkdirSync(dirname(resolve(path)), { recursive: true });
-  const db = new DatabaseSync(path);
+  return initializeDemo(new DatabaseSync(path));
+}
+function initializeDemo(db:DatabaseSync){
   db.exec(`PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL;
   CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY,name TEXT NOT NULL,role TEXT NOT NULL,project_id TEXT,deleted INTEGER DEFAULT 0);
   CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),expires TEXT,stepup_until TEXT);
@@ -100,6 +103,10 @@ export function openDatabase(
   migrateRetail(db);
   return db;
 }
+/** Synthetic fixture database only. No filesystem path or production adapter is accepted. */
+export function createShowcaseDatabase(){return initializeDemo(new DatabaseSync(':memory:'));}
+const syntheticVault = new AsyncLocalStorage<Buffer>();
+export function withSyntheticVault<T>(key:Buffer,work:()=>T):T{return syntheticVault.run(key,work);}
 export function seed(db: DatabaseSync) {
   for (let i = 0; i < projects.length; i++) {
     const p = `p${i + 1}`;
@@ -400,6 +407,7 @@ export function seed(db: DatabaseSync) {
 let singleton: DatabaseSync | undefined;
 export const getDb = () => (singleton ||= openDatabase());
 function key() {
+  const synthetic=syntheticVault.getStore();if(synthetic)return synthetic;
   const encoded = process.env.MDP_LOCAL_VAULT_KEY;
   if (!encoded || !/^[a-f0-9]{64}$/i.test(encoded))
     throw new Error(

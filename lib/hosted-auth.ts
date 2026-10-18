@@ -112,12 +112,12 @@ export async function hostedAuth(req:NextRequest, path:string[]) {
       const response=json({ok:true});response.cookies.delete(accessCookie);response.cookies.delete(refreshCookie);return response;
     }
     if(route==='auth/session'&&req.method==='GET') {
-      const [projects,requests,memberships]=await Promise.all([
+      const [projects,requests,context]=await Promise.all([
         call('/rest/v1/projects?select=id,name,status&order=name',{},token),
         call('/rest/v1/residence_requests?select=id,project_id,flat_label,kind,status,created_at&order=created_at.desc',{},token),
-        call('/rest/v1/memberships?select=id,status,kind,flat_id',{},token)
+        rpc('operations_context')
       ]);
-      return respond({user:{id:user.id,email:user.email},projects,requests,memberships});
+      return respond({user:{id:user.id,email:user.email},projects,requests,memberships:context.memberships,owner:context.owner===true});
     }
     if(route==='auth/residence'&&req.method==='POST') {
       const b=await req.json();
