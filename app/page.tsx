@@ -1,5 +1,8 @@
 "use client";
 import { GroceryStorefront, ProductArt } from "@/components/grocery-storefront";
+import { useBasket } from "@/components/use-basket";
+import { basketKey } from "@/lib/basket";
+import { HostedAccess } from "@/components/hosted-access";
 import { BrandLockup } from "@/components/brand-lockup";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Carpool } from "@/components/carpool";
@@ -293,10 +296,12 @@ function Modal({
   );
 }
 export default function App() {
+  return process.env.NEXT_PUBLIC_HOSTED_AUTH === "true" ? <HostedAccess /> : <DemoApp />;
+}
+function DemoApp() {
   const [data, setData] = useState<R | null>(null),
     [tab, setTab] = useState("home"),
     [actor, setActor] = useState("resident"),
-    [cart, setCart] = useState<Record<string, number>>({}),
     [cartOpen, setCartOpen] = useState(false),
     [notice, setNotice] = useState(""),
     [error, setError] = useState(""),
@@ -305,6 +310,9 @@ export default function App() {
     [search, setSearch] = useState(""),
     [notifications, setNotifications] = useState(false),
     [visiting, setVisiting] = useState<string | undefined>();
+  const basket = useBasket(data?.user.role === "resident" && data?.active?.flat_id
+    ? basketKey(data.user.id, data.active.flat_id) : null);
+  const cart = basket.cart;
   const load = async () => {
     const d = await api("bootstrap");
     setData(d);
@@ -349,7 +357,7 @@ export default function App() {
   };
   const switchPersona = async (v: string) => {
     setActor(v);
-    setCart({});
+    setCartOpen(false);
     setData(null);
     await act(async () => {
       await api("demo-login", "POST", { actor: v });
@@ -381,12 +389,13 @@ export default function App() {
     go(uid === data?.user.id ? "profile" : "resident-profile");
   };
   const add = (pid: string, delta: number) =>
-    setCart((c) => {
+    basket.edit((c) => {
       const max = data?.products.find((p: R) => p.id === pid)?.stock || 0;
-      return {
-        ...c,
-        [pid]: Math.max(0, Math.min(20, max, (c[pid] || 0) + delta)),
-      };
+      const next = {...c};
+      const qty = Math.max(0, Math.min(20, max, (c[pid] || 0) + delta));
+      if (qty) next[pid] = qty;
+      else delete next[pid];
+      return next;
     });
   const count = Object.values(cart).reduce((a, b) => a + b, 0),
     total =
@@ -769,6 +778,7 @@ export default function App() {
           {notice}
         </div>
       )}
+      {basket.error && <div className="toast" role="alert">{basket.error}</div>}
       {busy && <div className="busy-bar" />}
       {cartOpen && data && (
         <Checkout
@@ -777,12 +787,22 @@ export default function App() {
           add={add}
           close={() => setCartOpen(false)}
           busy={busy}
-          act={act}
-          done={() => {
-            setCart({});
-            setCartOpen(false);
-            go("essentials");
+          pending={basket.pending}
+          ready={basket.ready}
+          submit={async (details: {flatId: string; slot: string; substitution: string}) => {
+            setBusy(true);
+            setError("");
+            try {
+              const result = await basket.checkout(details);
+              setCartOpen(false);
+              go("essentials");
+              setNotice(`Order confirmed · ${result.id}`);
+              try { await load(); }
+              catch { setError("Your order is confirmed. Refresh My orders to update the list."); }
+            } catch (e) { setError((e as Error).message); }
+            finally { setBusy(false); }
           }}
+          error={error}
         />
       )}
     </div>
@@ -1075,12 +1095,11 @@ function OrderCard({ o, children }: { o: R; children: ReactNode }) {
     </article>
   );
 }
-function Checkout({ data, cart, add, close, busy, act, done }: any) {
+function Checkout({ data, cart, add, close, busy, pending, ready, submit, error }: any) {
   const [slot, setSlot] = useState(
-      data.slots.find((s: R) => s.remaining > 0)?.id || "",
+      pending?.slot || data.slots.find((s: R) => s.remaining > 0)?.id || "",
     ),
-    [sub, setSub] = useState("none"),
-    [key] = useState(() => crypto.randomUUID());
+    [sub, setSub] = useState(pending?.substitution || "none");
   const lines = data.products.filter((p: R) => cart[p.id] > 0),
     subtotal = lines.reduce((n: number, p: R) => n + p.price * cart[p.id], 0),
     fee = subtotal >= 29900 ? 0 : 2000;
@@ -1089,6 +1108,8 @@ function Checkout({ data, cart, add, close, busy, act, done }: any) {
       <p className="muted">
         {data.active?.project} · {data.active?.label}
       </p>
+      {error && <p role="alert">{error}</p>}
+      {pending && <p role="status">An earlier checkout needs confirmation. Retry checks that same order; items and delivery choices stay unchanged.</p>}
       <div className="checkout-items">
         {lines.map((p: R) => (
           <div key={p.id}>
@@ -1102,12 +1123,13 @@ function Checkout({ data, cart, add, close, busy, act, done }: any) {
             <div className="stepper">
               <button
                 aria-label={`Remove ${p.name}`}
+                disabled={busy || !!pending}
                 onClick={() => add(p.id, -1)}
               >
                 <Minus size={14} />
               </button>
               <span>{cart[p.id]}</span>
-              <button aria-label={`Add ${p.name}`} onClick={() => add(p.id, 1)}>
+              <button disabled={busy || !!pending} aria-label={`Add ${p.name}`} onClick={() => add(p.id, 1)}>
                 <Plus size={14} />
               </button>
             </div>
@@ -1116,7 +1138,8 @@ function Checkout({ data, cart, add, close, busy, act, done }: any) {
         ))}
       </div>
       <Field label="Choose your delivery window (IST)">
-        <select value={slot} onChange={(e) => setSlot(e.target.value)}>
+        <select disabled={busy || !!pending} value={pending?.slot || slot} onChange={(e) => setSlot(e.target.value)}>
+          {pending && !data.slots.some((s: R) => s.id === pending.slot) && <option value={pending.slot}>{when(pending.slot)} · previous checkout</option>}
           {data.slots.map((s: R) => (
             <option key={s.id} value={s.id} disabled={!s.remaining}>
               {when(s.id)} · {s.remaining} slots left
@@ -1125,7 +1148,7 @@ function Checkout({ data, cart, add, close, busy, act, done }: any) {
         </select>
       </Field>
       <Field label="If something becomes unavailable">
-        <select value={sub} onChange={(e) => setSub(e.target.value)}>
+        <select disabled={busy || !!pending} value={pending?.substitution || sub} onChange={(e) => setSub(e.target.value)}>
           <option value="none">Do not substitute; contact me</option>
           <option value="ask">Ask me before any substitution</option>
         </select>
@@ -1153,24 +1176,10 @@ function Checkout({ data, cart, add, close, busy, act, done }: any) {
       </div>
       <Button
         variant="full"
-        disabled={busy || !lines.length || !slot || !data.services?.groceries}
-        onClick={async () => {
-          const r = await act(
-            () =>
-              api("orders", "POST", {
-                items: lines.map((p: R) => ({ id: p.id, qty: cart[p.id] })),
-                flatId: data.active.flat_id,
-                slot,
-                substitution: sub,
-                payment: "cod",
-                key,
-              }),
-            "Your demo order is placed",
-          );
-          if (r) done();
-        }}
+        disabled={busy || !ready || (!pending && (!lines.length || !slot || !data.services?.groceries))}
+        onClick={() => submit({flatId: data.active.flat_id, slot, substitution: sub})}
       >
-        Place demo order <ArrowRight size={17} />
+        {pending ? "Check previous order" : "Place demo order"} <ArrowRight size={17} />
       </Button>
     </Modal>
   );
