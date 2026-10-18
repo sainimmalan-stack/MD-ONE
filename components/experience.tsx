@@ -2146,6 +2146,7 @@ export function ServiceDesk({ data, act, busy }: Props) {
         ops.requests.length ? (
           ops.requests.map((r: R) => (
             <ServiceRequest key={r.id} r={r}>
+              {!tech&&data.hosted&&["requested","assigned"].includes(r.status)&&<button className="exp-secondary" disabled={busy} onClick={()=>act(()=>request("insta-services/"+r.id,"PATCH",{status:"cancelled"}),"Service request cancelled")}>Cancel request</button>}
               {!tech && r.status === "requested" && (
                 <form
                   className="exp-assign-form"
@@ -2171,7 +2172,7 @@ export function ServiceDesk({ data, act, busy }: Props) {
                       Choose a {r.category.toLowerCase()} specialist
                     </option>
                     {ops.technicians
-                      .filter((t: R) => t.trade === r.category_id && (!data.hosted || t.on_shift))
+                      .filter((t: R) => t.trade === r.category_id && (!data.hosted || (t.on_shift && !ops.requests.some((job:R)=>job.technician_id===t.id && ["assigned","en_route","in_progress"].includes(job.status)))))
                       .map((t: R) => (
                         <option key={t.id} value={t.id}>
                           {t.name}

@@ -1225,6 +1225,7 @@ export function MyProject({ data }: { data: R }) {
       await send("settings", {
         ...v,
         action: "liability",
+        ...(data.hosted ? {area:Number(v.area)===0?null:v.area,areaVerified:Number(v.area)>0&&v.areaVerified} : {}),
         openingDue: Math.round(v.openingDue * 100),
         exemption: Math.round(v.exemption * 100),
       });
