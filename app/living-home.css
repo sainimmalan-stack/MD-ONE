@@ -1,0 +1,54 @@
+/* Shared, action-first resident home. Colors follow the selected appearance. */
+.living-home{max-width:1060px;margin:0 auto;color:var(--text-primary)}
+.living-welcome{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:12px}
+.living-welcome p{font-size:10px;letter-spacing:1.5px;color:var(--text-secondary);margin:0 0 7px}
+.living-welcome h1{font-size:32px;letter-spacing:-1px;margin:0;line-height:1.2}
+.living-basket{position:relative;border:1px solid var(--border-default);background:var(--surface-raised);color:var(--text-primary);border-radius:14px;min-width:46px;min-height:46px;display:flex;gap:7px;align-items:center;justify-content:center;padding:10px}
+.living-groceries{position:relative;isolation:isolate;overflow:hidden;border-radius:20px;min-height:225px;background:#181816;color:#fff;border:1px solid #ffffff1c;display:flex;align-items:center}
+.living-groceries:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#111 0%,#111e 33%,#1113 77%)}
+.living-groceries img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;object-position:65% center}
+.living-grocery-copy{padding:28px;position:relative;max-width:70%}
+.living-grocery-copy>span{font-size:10px;letter-spacing:1.6px;color:#ddd}
+.living-grocery-copy h2{font-size:30px;line-height:1.12;letter-spacing:-1px;color:#fff;margin:12px 0 9px}
+.living-grocery-copy p{font-size:12px;color:#e5e5e5;margin:0 0 18px}
+.living-grocery-copy button{border:0;border-radius:10px;background:#fff;color:#171717;display:flex;align-items:center;gap:15px;min-height:44px;padding:11px 15px;font-size:12px;font-weight:600}
+.living-shortcuts{margin-top:28px}.living-shortcuts>h2{font-size:19px;font-weight:600;letter-spacing:-.4px;margin:0 0 17px}
+.living-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.living-grid>button{min-width:0;border:1px solid var(--border-default);background:var(--surface-raised);color:var(--text-primary);border-radius:15px;min-height:105px;padding:16px 8px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:11px;cursor:pointer}
+.living-grid>button>span{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:var(--surface-overlay)}
+.living-grid>button strong{font-size:12px;line-height:17px;font-weight:500;text-align:center}
+.living-grid>button:hover{border-color:var(--text-secondary);background:var(--surface-overlay)}
+.living-grid>button:focus-visible,.living-home button:focus-visible{outline:2px solid #ef721b;outline-offset:3px}
+.living-order{width:100%;display:flex;align-items:center;gap:13px;text-align:left;border:1px solid var(--border-default);border-radius:14px;background:var(--surface-raised);color:var(--text-primary);padding:16px;margin-top:24px}
+.living-order>span:nth-child(2){flex:1}.living-order strong,.living-order small{display:block}.living-order small{font-size:12px;color:var(--text-secondary);margin-top:5px;text-transform:capitalize}
+.living-order-icon{color:#ed782d}.living-footer-links{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.living-footer-links button{display:flex;align-items:center;gap:12px;border:1px solid var(--border-default);border-radius:13px;background:var(--surface-raised);color:var(--text-primary);padding:18px;text-align:left;min-height:70px}
+.living-footer-links button>span{flex:1;font-size:13px}.living-footer-links small{display:block;color:var(--text-secondary);font-size:11px;margin-top:5px}
+.living-feature-heading{margin-bottom:22px}.living-feature-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 8px}.living-feature-heading p{font-size:13px;color:var(--text-secondary)}
+.living-shell .mobile-nav{grid-template-columns:repeat(4,minmax(0,1fr))}
+.living-shell .exp-service-card{padding:20px;min-height:205px}.living-shell .exp-service-card h3{font-size:22px;margin:15px 0 8px}.living-shell .exp-service-card p{font-size:13px;line-height:1.5}.living-shell .exp-service-how{margin-top:24px}
+.living-shell .connect-page>.page-heading{margin-bottom:22px}.living-shell .connect-page>.page-heading h1{font-size:30px;line-height:1.15}.living-shell .connect-page>.page-heading .eyebrow{display:none}
+.living-shell .marketplace-shell .cm-banner{padding:18px 0;min-height:0;background:none;border:0}.living-shell .marketplace-shell .cm-banner h1,.living-shell .marketplace-shell .cm-banner h2{font-size:23px}
+@media(min-width:1000px){.living-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.living-home{max-width:1000px}.living-groceries{min-height:260px}.living-grocery-copy h2{font-size:38px}}
+@media(max-width:760px){
+ .living-shell .topbar .mobile-menu{display:none}.living-shell main{padding-top:20px}
+ .living-shell .mobile-residence{display:none}.living-shell .topbar .header-project{left:16px}
+ .living-welcome{margin-bottom:18px}.living-welcome h1{font-size:27px}.living-welcome p{font-size:9px}
+ .living-groceries{min-height:184px;border-radius:17px}.living-grocery-copy{padding:21px;max-width:85%}.living-grocery-copy h2{font-size:27px}.living-grocery-copy p{font-size:11px;margin-bottom:14px}.living-grocery-copy>span{font-size:9px}
+ .living-shortcuts{margin-top:23px}.living-shortcuts>h2{font-size:18px;margin-bottom:14px}.living-grid{gap:9px}.living-grid>button{padding:13px 4px;min-height:98px;border-radius:13px;gap:9px}.living-grid>button>span{width:36px;height:36px;border-radius:10px}.living-grid>button strong{font-size:11px}.living-grid svg{width:22px;height:22px}
+ .living-footer-links{grid-template-columns:1fr}.living-footer-links button{padding:15px}
+ .living-shell .exp-service-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.living-shell .exp-service-card{padding:17px;min-height:190px;border-radius:15px}.living-shell .exp-service-icon{width:40px;height:40px;border-radius:11px}.living-shell .exp-service-icon svg{width:24px;height:24px}.living-shell .exp-service-card h3{font-size:19px;margin:13px 0 7px}.living-shell .exp-service-card p{font-size:12px}.living-shell .exp-service-card-bottom{font-size:11px;padding-top:12px;margin-top:12px}.living-shell .exp-service-number{font-size:10px}.living-shell .exp-service-how{display:none}
+ .living-shell .connect-search{margin-top:0}.living-shell .connect-page>.page-heading h1{font-size:27px}.living-shell .connect-page>.page-heading p{font-size:12px}.living-shell .connect-page>.page-heading{gap:13px}.living-shell .connect-page>.page-heading .button{width:auto;font-size:12px;padding:11px 14px}
+ .living-shell .marketplace-heading h1{font-size:27px}.living-shell .marketplace-heading{margin-bottom:16px}.living-shell .marketplace-mode{margin-bottom:16px}.living-shell .cm-exchange-intro{margin:14px 0}
+}
+@media(max-width:360px){.living-grid>button strong{font-size:10px}.living-grocery-copy{padding:18px}.living-grocery-copy h2{font-size:25px}.living-shell .header-brand .md-brand-product>span{font-size:22px}}
+
+.showcase-explanation{position:relative;max-width:650px}.showcase-explanation summary{font-size:11px;cursor:pointer;min-height:36px;display:flex;align-items:center;color:var(--text-secondary)}.showcase-explanation p{font-size:11px;line-height:1.5;margin:0 0 8px}
+@media(max-width:760px){
+ .living-shell.md-showcase .showcase-ribbon{flex-direction:row;align-items:center;min-height:44px;padding:4px 16px;gap:10px}.living-shell.md-showcase .showcase-ribbon>div{width:auto;gap:12px}.living-shell.md-showcase .showcase-ribbon button,.living-shell.md-showcase .showcase-ribbon a{font-size:10px;min-height:36px}.showcase-explanation summary{font-size:10px}.living-shell.md-showcase .demo-strip{min-height:44px;padding:2px 16px}.living-shell.md-showcase .demo-strip select{min-height:40px;font-size:12px}
+ .living-shell.app-shell .topbar .mobile-menu{display:none}.living-shell .mobile-nav.md-live-mobile-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .living-shell .marketplace-shell .cm-banner .cm-eyebrow:empty{display:none}.living-shell .marketplace-shell .cm-banner p{margin:8px 0 12px;font-size:12px}.living-shell .marketplace-shell .cm-banner{gap:12px;margin:0 0 12px;padding:8px 0}.living-shell .marketplace-shell .cm-banner h1{font-size:22px}
+}
+
+/* The showcase ribbon already reserves layout space; do not offset a relative header again. */
+@media(min-width:761px){.living-shell.md-showcase .topbar{top:0}}

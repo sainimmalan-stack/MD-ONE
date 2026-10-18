@@ -6,6 +6,7 @@ import "./brand.css";
 import "./themes.css";
 import "./navigation.css";
 import "./mobile-app.css";
+import "./living-home.css";
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 export const metadata: Metadata = {
   title: "MD One — One app. Everyday living.",
